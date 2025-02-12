@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.sisl.gpsvideorecorder.permission.AndroidPermissionHandler
 
 class MainActivity : ComponentActivity() {
@@ -12,6 +13,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         permissionHandler = AndroidPermissionHandler(this)
         val permission = mutableListOf(
             android.Manifest.permission.CAMERA,
@@ -21,6 +23,8 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permission.add(android.Manifest.permission.POST_NOTIFICATIONS)
         }
+
+
         setContent {
             App(permissionHandler, permission, this)
         }
