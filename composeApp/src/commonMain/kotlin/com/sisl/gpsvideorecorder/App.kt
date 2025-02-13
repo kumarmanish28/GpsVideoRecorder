@@ -1,8 +1,8 @@
 package com.sisl.gpsvideorecorder
 
 import androidx.compose.runtime.Composable
-import com.sisl.gpsvideorecorder.permission.PermissionHandler
-import com.sisl.gpsvideorecorder.screen.HomeScreen
+import com.sisl.gpsvideorecorder.platform.permission.PermissionHandler
+import com.sisl.gpsvideorecorder.presentation.screen.HomeScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
