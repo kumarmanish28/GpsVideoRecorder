@@ -1,5 +1,5 @@
 // In iosMain
-package com.sisl.gpsvideorecorder.data
+package com.sisl.gpsvideorecorder.presentation.components.recorder
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -45,7 +45,7 @@ actual class VideoRecorder actual constructor() {
     }
     private val videoOutput = AVCaptureMovieFileOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer? = null
-    private var recordingState = RecordingState.IDLE
+    private var recordingState = RecordingState.STOPPED
     private var isInitialized = false
 
     actual fun initialize(onReady: () -> Unit) {
@@ -131,7 +131,7 @@ actual class VideoRecorder actual constructor() {
                         RecordingState.STOPPED
                     } else {
                         println("Recording saved to: ${didFinishRecordingToOutputFileAtURL.path}")
-                        RecordingState.IDLE
+                        RecordingState.STOPPED
                     }
                 }
             }
@@ -144,7 +144,6 @@ actual class VideoRecorder actual constructor() {
         recordingState = RecordingState.STOPPED
     }
 
-    actual fun getRecordingState(): RecordingState = recordingState
 
     @OptIn(ExperimentalForeignApi::class)
     private fun configureCaptureSession() {
@@ -195,5 +194,6 @@ actual class VideoRecorder actual constructor() {
 
 @Composable
 actual fun rememberVideoRecorder(): VideoRecorder {
-    return remember { VideoRecorder().also { it.initialize() } }
+//    return remember { VideoRecorder().also { it.initialize() } }
+    return remember { VideoRecorder()}
 }

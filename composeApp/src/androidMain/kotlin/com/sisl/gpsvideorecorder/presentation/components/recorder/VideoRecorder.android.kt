@@ -1,17 +1,18 @@
-package com.sisl.gpsvideorecorder.data
+package com.sisl.gpsvideorecorder.presentation.components.recorder
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Context
-import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FileOutputOptions
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
@@ -35,25 +36,29 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.contentValuesOf
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
+import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
 import java.io.File
 
 // In commonMain
 actual class VideoRecorder actual constructor() {
     private var cameraProvider: ProcessCameraProvider? = null
-    private var recordingState = RecordingState.IDLE
+    private var recordingState = RecordingState.STOPPED
     lateinit var context: Context
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
     private var preview: Preview? = null
     private var isInitialized by mutableStateOf(false)
-
-
+    private var cameraSelector: CameraSelector? = null
     actual fun initialize(onReady: () -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
+                cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                setupCameraUseCases()
                 isInitialized = true
                 onReady()
             } catch (e: Exception) {
@@ -69,49 +74,41 @@ actual class VideoRecorder actual constructor() {
         ]
     )
     actual fun startRecording() {
-        if (videoCapture == null) {
-            Log.e("VideoRecorder", "VideoCapture is null - camera not ready")
+        if (!isInitialized || videoCapture == null) {
+            Log.e(
+                "VideoRecorder",
+                "Camera not ready - isInitialized: $isInitialized, videoCapture: $videoCapture"
+            )
             return
         }
 
         try {
-            val outputFile = File(
+            val videoFile = File(
                 context.getExternalFilesDir(Environment.DIRECTORY_MOVIES),
                 "video_${System.currentTimeMillis()}.mp4"
-            ).apply { parentFile?.mkdirs() }
-
-            val mediaStoreOutputOptions = MediaStoreOutputOptions.Builder(
-                context.contentResolver,
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             )
-                .setContentValues(contentValuesOf(
-                    MediaStore.Video.Media.DISPLAY_NAME to outputFile.name,
-                    MediaStore.Video.Media.MIME_TYPE to "video/mp4"
-                ))
-                .build()
+            val outputOptions = FileOutputOptions.Builder(videoFile).build()
+
 
             recording = videoCapture?.output
-                ?.prepareRecording(context, mediaStoreOutputOptions)
+                ?.prepareRecording(context, outputOptions)
                 ?.withAudioEnabled()
                 ?.start(ContextCompat.getMainExecutor(context)) { event ->
-                    when (event) {
-                        is VideoRecordEvent.Start -> recordingState = RecordingState.RECORDING
-                        is VideoRecordEvent.Finalize -> {
-                            recordingState = if (event.hasError()) {
-                                Log.e("VideoRecorder", "Recording failed: ${event.error}")
-                                RecordingState.STOPPED
-                            } else {
-                                Log.d("VideoRecorder", "Recording saved to ${outputFile.path}")
-                                RecordingState.IDLE
-                            }
+                    if (event is VideoRecordEvent.Finalize) {
+                        if (event.hasError()) {
+                            Log.e("CameraRecorder", "Recording error: ${event.error}")
+                        } else {
+                            Log.d("CameraRecorder", "Recording saved: ${event.outputResults.outputUri}")
+                            saveVideoToGallery(event.outputResults.outputUri)
                         }
                     }
                 }
+
         } catch (e: Exception) {
-            Log.e("VideoRecorder", "Recording start failed", e)
             recordingState = RecordingState.STOPPED
         }
     }
+
     actual fun stopRecording() {
         try {
             recording?.stop()
@@ -123,9 +120,6 @@ actual class VideoRecorder actual constructor() {
         }
     }
 
-    actual fun getRecordingState(): RecordingState = recordingState
-
-
     @Composable
     actual fun CameraPreview(modifier: Modifier) {
         if (!isInitialized) {
@@ -134,6 +128,7 @@ actual class VideoRecorder actual constructor() {
         }
         val lifecycleOwner = LocalLifecycleOwner.current
         val currentCameraProvider = cameraProvider ?: return
+        val currentPreview = preview ?: return
 
         AndroidView(
             factory = { ctx ->
@@ -146,25 +141,15 @@ actual class VideoRecorder actual constructor() {
             update = { previewView ->
 
                 try {
-                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                    val newPreview = Preview.Builder().build()
-                    preview = newPreview
-
-                    val qualitySelector = QualitySelector.from(Quality.HD)
-                    val recorder = Recorder.Builder()
-                        .setQualitySelector(qualitySelector)
-                        .build()
-                    videoCapture = VideoCapture.withOutput(recorder)
-
                     currentCameraProvider.unbindAll()
                     currentCameraProvider.bindToLifecycle(
                         lifecycleOwner,
-                        cameraSelector,
-                        newPreview,
+                        cameraSelector ?: CameraSelector.DEFAULT_BACK_CAMERA,
+                        currentPreview,
                         videoCapture
                     )
 
-                    newPreview.setSurfaceProvider(previewView.surfaceProvider)
+                    currentPreview.surfaceProvider = previewView.surfaceProvider
                 } catch (exc: Exception) {
                     Log.e("CameraPreview", "Use case binding failed", exc)
                 }
@@ -173,16 +158,51 @@ actual class VideoRecorder actual constructor() {
 
     }
 
+    private fun setupCameraUseCases() {
+        val qualitySelector = QualitySelector.from(Quality.HD)
+        val recorder = Recorder.Builder()
+            .setQualitySelector(qualitySelector)
+            .build()
+        videoCapture = VideoCapture.withOutput(recorder)
+        preview = Preview.Builder().build()
+    }
+
+    private fun saveVideoToGallery(videoUri: Uri) {
+        try {
+            val resolver = context.contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Video.Media.DISPLAY_NAME, "video_${System.currentTimeMillis()}.mp4")
+                put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+                put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
+            }
+
+            resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+                ?.let { uri ->
+                    resolver.openOutputStream(uri)?.use { outputStream ->
+                        resolver.openInputStream(videoUri)?.use { inputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                    }
+                    Toast.makeText(context, "Video saved to gallery", Toast.LENGTH_SHORT).show()
+                } ?: Log.e("CameraRecorder", "Failed to save video")
+        } catch (ignore: Exception) {
+        }
+    }
 }
+
 
 @Composable
 actual fun rememberVideoRecorder(): VideoRecorder {
     val context = LocalContext.current
-    return remember {
+    val recorder = remember {
         VideoRecorder().apply {
             this.context = context
-        }.also {
-            it.initialize() // Initialize immediately
         }
     }
+
+    LaunchedEffect(Unit) {
+        recorder.initialize()
+    }
+
+    return recorder
 }

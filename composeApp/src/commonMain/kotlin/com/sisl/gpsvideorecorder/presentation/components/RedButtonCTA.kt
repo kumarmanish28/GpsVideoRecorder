@@ -1,4 +1,4 @@
-package com.sisl.gpsvideorecorder.components
+package com.sisl.gpsvideorecorder.presentation.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize

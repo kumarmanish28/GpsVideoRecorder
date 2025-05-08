@@ -1,4 +1,4 @@
-package com.sisl.gpsvideorecorder.ui
+package com.sisl.gpsvideorecorder.presentation.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sisl.gpsvideorecorder.CheckBoxBorderColor
 import com.sisl.gpsvideorecorder.PrimaryColor
-import com.sisl.gpsvideorecorder.components.EditTextField
-import com.sisl.gpsvideorecorder.components.RedButtonCTA
+import com.sisl.gpsvideorecorder.presentation.components.EditTextField
+import com.sisl.gpsvideorecorder.presentation.components.RedButtonCTA
 import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
 import gpsvideorecorder.composeapp.generated.resources.ic_login_bg

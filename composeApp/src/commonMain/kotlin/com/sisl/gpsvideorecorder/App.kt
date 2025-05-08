@@ -5,16 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.sisl.gpsvideorecorder.ui.LoginScreen
-import com.sisl.gpsvideorecorder.ui.SplashScreen
-import com.sisl.gpsvideorecorder.ui.VideoRecordingScreen
+import com.sisl.gpsvideorecorder.presentation.ui.LoginScreen
+import com.sisl.gpsvideorecorder.presentation.ui.SplashScreen
+import com.sisl.gpsvideorecorder.presentation.ui.VideoRecordingScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
-    VideoRecordingScreen()
-   /* var currentScreen by remember { mutableStateOf(Screen.Splash) }
+//    VideoRecordingScreen()
+    var currentScreen by remember { mutableStateOf(Screen.Splash) }
 
     MyTheme {
         when (currentScreen) {
@@ -33,7 +33,7 @@ fun App() {
                 VideoRecordingScreen()
             }
         }
-    }*/
+    }
 }
 
 private enum class Screen {

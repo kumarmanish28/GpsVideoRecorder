@@ -1,21 +1,20 @@
-package com.sisl.gpsvideorecorder.data
+package com.sisl.gpsvideorecorder.presentation.components.recorder
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 // In commonMain
 expect class VideoRecorder() {
-    fun initialize(onReady : () -> Unit = {})
+    fun initialize(onReady: () -> Unit = {})
     fun startRecording()
     fun stopRecording()
-    fun getRecordingState(): RecordingState
 
     @Composable
     fun CameraPreview(modifier: Modifier = Modifier)
 }
 
 enum class RecordingState {
-    IDLE, RECORDING, STOPPED
+    RECORDING, STOPPED
 }
 
 @Composable

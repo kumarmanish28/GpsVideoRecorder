@@ -1,4 +1,4 @@
-package com.sisl.gpsvideorecorder.ui
+package com.sisl.gpsvideorecorder.presentation.ui
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
