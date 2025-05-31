@@ -31,7 +31,7 @@ room = "2.7.1"
 dataStore="1.1.5"
 playServicesLocation = "21.3.0"
 
-
+compottie="2.0.0-rc04"
 
 [libraries]
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraVideo" }
@@ -80,6 +80,10 @@ material3-window-size = { module = "org.jetbrains.compose.material3:material3-wi
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
+compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "compottie" }
+compottie-dot = { module = "io.github.alexzhirkevich:compottie-dot", version.ref = "compottie" }
+compottie-network = { module = "io.github.alexzhirkevich:compottie-network", version.ref = "compottie" }
+compottie-resources = { module = "io.github.alexzhirkevich:compottie-resources", version.ref = "compottie" }
 
 
 [plugins]

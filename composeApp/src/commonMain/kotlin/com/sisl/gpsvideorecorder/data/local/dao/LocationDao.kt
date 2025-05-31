@@ -67,7 +67,7 @@ interface LocationDao {
 
 
     @Query("SELECT * ,  (SELECT IFNULL(MAX(videoId), 0) + 1 FROM locations) AS videoId  FROM locations ORDER BY timestamp DESC LIMIT 1")
-    fun getLatestLocationWithVideoId(): LocationEntityWithVideoDto?
+    suspend fun getLatestLocationWithVideoId(): LocationEntityWithVideoDto?
 
     @Query(
         """

@@ -1,7 +1,5 @@
 package com.sisl.gpsvideorecorder.data.local.models
 
-import androidx.room.Ignore
-
 data class LocationEntityDto(
     val id: Int = 0,
     val time: String,

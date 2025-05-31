@@ -20,6 +20,7 @@ class AndroidLocationDataSource : LocationDataSource, KoinComponent {
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(context)
     }
+    private var lastLocation: Location? = null
 
     private val _locationUpdates = MutableSharedFlow<LocationData>(extraBufferCapacity = 10)
 
@@ -45,8 +46,12 @@ class AndroidLocationDataSource : LocationDataSource, KoinComponent {
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
-            result.locations.lastOrNull()?.toLocationData()?.let {
-                _locationUpdates.tryEmit(it)
+            result.locations.lastOrNull()?.let { newLocation ->
+                val previous = lastLocation
+                if (previous == null || previous.distanceTo(newLocation) >= 2f) {
+                    lastLocation = newLocation
+                    _locationUpdates.tryEmit(newLocation.toLocationData())
+                }
             }
         }
     }

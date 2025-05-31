@@ -1,6 +1,8 @@
 package com.sisl.gpsvideorecorder.data.datasources
 
 import com.sisl.gpsvideorecorder.domain.models.LocationData
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import platform.CoreLocation.CLLocation
@@ -13,11 +15,17 @@ class IosLocationDataSource : LocationDataSource {
 
     private val _locationUpdates = MutableSharedFlow<LocationData>(extraBufferCapacity = 10)
     override val locationUpdates: SharedFlow<LocationData> = _locationUpdates
+    private var lastLocation: CLLocation? = null
+
 
     private val locationManagerDelegate = object : NSObject(), CLLocationManagerDelegateProtocol {
         override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
-            (didUpdateLocations.lastOrNull() as? CLLocation)?.toLocationData()?.let {
-                _locationUpdates.tryEmit(it)
+            val current = (didUpdateLocations.lastOrNull() as? CLLocation) ?: return
+
+            val previous = lastLocation
+            if (previous == null || current.distanceFromLocation(previous) >= 2.0) {
+                lastLocation = current
+                _locationUpdates.tryEmit(current.toLocationData())
             }
         }
     }
@@ -36,11 +44,11 @@ class IosLocationDataSource : LocationDataSource {
         locationManager.stopUpdatingLocation()
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     private fun CLLocation.toLocationData(): LocationData {
-//        val latitude = this.coordinate.latitude
-//        val longitude = this.coordinate.longitude
-        val latitude = 28.343555
-        val longitude = 77.342345
+
+        val latitude = coordinate.useContents { latitude }
+        val longitude = coordinate.useContents { longitude }
 
         return LocationData(
             latitude = latitude,

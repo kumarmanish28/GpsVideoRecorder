@@ -33,23 +33,23 @@ class GpsVideoRecorderViewModel(
                 _latestLocation.value = location
                 if (_videoRecordingState.value == RecordingState.RECORDING) {
                     _locations.add(location)
+                    locationRepository.insertLocation(location)
                 }
             }
-
         }
     }
 
     fun startGspVideoRecording(videoRecorder: VideoRecorder) {
         _videoRecordingState.value = RecordingState.RECORDING
-//        videoRecorder.startRecording()
+        videoRecorder.startRecording()
         locationRepository.startLocationTracking()
     }
 
     fun stopGpsVideoRecording(videoRecorder: VideoRecorder) {
         _videoRecordingState.value = RecordingState.STOPPED
-//        videoRecorder.stopRecording()
+        videoRecorder.stopRecording()
         locationRepository.stopLocationTracking()
-//        saveGpsVideoRecordingWithLocation()
+//      saveGpsVideoRecordingWithLocation()
     }
 
 

@@ -14,10 +14,8 @@ plugins {
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     
@@ -31,6 +29,14 @@ kotlin {
             isStatic = true
         }
     }
+
+    // Add this for Apple Silicon compatibility
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.all {
+            binaryOptions["memoryModel"] = "experimental"
+        }
+    }
+
     
     sourceSets {
         androidMain.dependencies {
@@ -67,6 +73,10 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.compottie)
+            implementation(libs.compottie.resources)
+            implementation(libs.compottie.dot)
+            implementation(libs.compottie.network)
             api(libs.koin.core)
 
             implementation(libs.bundles.ktor)

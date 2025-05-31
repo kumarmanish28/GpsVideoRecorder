@@ -7,4 +7,8 @@ interface LocationRepository {
     fun startLocationTracking()
     fun stopLocationTracking()
     val locationUpdates: Flow<LocationData>
+
+
+    // Add database operations
+    suspend fun insertLocation(location: LocationData)
 }
