@@ -12,6 +12,7 @@ data class LocationEntity(
     val latitude: Double,
     val longitude: Double,
     var isUploaded: Int,
+    var isDeleted: Int,
     var speed: Int = 0,
     val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
     val videoId: Long = 0
@@ -24,7 +25,8 @@ fun LocationData.toEntity() = LocationEntity(
     timestamp = timestamp,
     speed = speed,
     time = time,
-    isUploaded = isUploaded
+    isUploaded = isUploaded,
+    isDeleted = isUploaded
 )
 
 fun LocationEntity.toDomain() = LocationData(
@@ -34,5 +36,6 @@ fun LocationEntity.toDomain() = LocationData(
     timestamp = timestamp,
     speed = speed,
     time = time,
-    isUploaded = isUploaded
+    isUploaded = isUploaded,
+    isDeleted = isDeleted
 )

@@ -8,6 +8,7 @@ import com.sisl.gpsvideorecorder.data.local.entities.LocationEntity
 import com.sisl.gpsvideorecorder.data.local.models.DateWisePendingLocation
 import com.sisl.gpsvideorecorder.data.local.models.LocationEntityDto
 import com.sisl.gpsvideorecorder.data.local.models.LocationEntityWithVideoDto
+import com.sisl.gpsvideorecorder.presentation.state.VideoItem
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,7 +17,7 @@ interface LocationDao {
     suspend fun insertLocation(location: LocationEntity)
 
     @Query("SELECT * FROM locations")
-    suspend fun getAllLocations(): List<LocationEntity>
+    fun getAllLocations(): Flow<List<LocationEntity>>
 
     @Query("DELETE FROM locations")
     suspend fun clearLocations()
@@ -24,34 +25,30 @@ interface LocationDao {
     @Query("UPDATE locations SET isUploaded = :status WHERE id = :id")
     suspend fun updateUploadedStatus(id: Int, status: Int)
 
-    /*@Query("SELECT * FROM locations ORDER BY id DESC LIMIT 1")
-    fun getLatestLocation(): Flow<LocationEntity?>
-*/
     @Query("SELECT * FROM locations ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getLastLocation(): LocationEntity?
+    fun getLastLocation(): Flow<LocationEntity?>
 
-    /* @Query("""
-         SELECT strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS date,
-                COUNT(*) AS record
-         FROM locations where isUploaded = 0
-         GROUP BY date
-         ORDER BY date DESC
-     """)
-     suspend fun getDateWisePendingLocationData(): List<DateWisePendingLocation>*/
-    @Query(
+  /*  @Query(
         """
-        SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS date, 
-               COUNT(*) AS record 
+        SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS dateTime, 
+               COUNT(*) AS coordinateCount, isUploaded, isDeleted
         FROM locations 
-        GROUP BY date 
-        ORDER BY date DESC
+        GROUP BY dateTime 
+        ORDER BY dateTime DESC
     """
     )
-    suspend fun getDateWisePendingLocationData(): List<DateWisePendingLocation>
+    suspend fun getDateWisePendingLocationData(): List<VideoItem>*/
+    @Query(
+        """
+        SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS dateTime, 
+               COUNT(*) AS coordinateCount, isUploaded, isDeleted
+        FROM locations 
+        GROUP BY videoId 
+        ORDER BY videoId ASC
+    """
+    )
+    suspend fun getDateWisePendingLocationData(): List<VideoItem>
 
-
-    /*@Query("SELECT * , (SELECT count(*) FROM locations) AS record FROM locations ORDER BY timestamp DESC LIMIT 1")
-    fun getLatestLocation(): Flow<LocationEntityDto?>*/
     @Query("SELECT * , (SELECT count(*) FROM locations where videoId = (select max(videoId) from locations) ) as record  FROM locations WHERE videoId = (SELECT MAX(videoId) FROM locations) ORDER BY id DESC LIMIT 1")
     fun getLatestLocation(): Flow<LocationEntityDto?>
 

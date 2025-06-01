@@ -5,7 +5,8 @@ data class LocationData(
     val latitude: Double,
     val longitude: Double,
     var isUploaded: Int,
+    var isDeleted: Int,
     var speed: Int = 0,
     val timestamp: Long,
-    val videoId: Long = 0
+    var videoId: Long = 0
 )

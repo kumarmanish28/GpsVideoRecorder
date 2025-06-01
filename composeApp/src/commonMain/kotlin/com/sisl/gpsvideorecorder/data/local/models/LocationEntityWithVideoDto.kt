@@ -6,6 +6,7 @@ data class LocationEntityWithVideoDto(
     val latitude: Double,
     val longitude: Double,
     var isUploaded: Int,
+    var isDeleted: Int,
     var speed: Int = 0,
     val timestamp: Long,
     val videoId: Long = 0

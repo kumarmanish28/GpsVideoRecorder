@@ -48,10 +48,10 @@ class AndroidLocationDataSource : LocationDataSource, KoinComponent {
         override fun onLocationResult(result: LocationResult) {
             result.locations.lastOrNull()?.let { newLocation ->
                 val previous = lastLocation
-                if (previous == null || previous.distanceTo(newLocation) >= 2f) {
+//                if (previous == null || previous.distanceTo(newLocation) >= 2f) {
                     lastLocation = newLocation
                     _locationUpdates.tryEmit(newLocation.toLocationData())
-                }
+//                }
             }
         }
     }
@@ -62,6 +62,7 @@ class AndroidLocationDataSource : LocationDataSource, KoinComponent {
         longitude = longitude,
         timestamp = time,
         time = DateFormatter.dateFormat(Clock.System.now().toEpochMilliseconds()),
-        isUploaded = 0
+        isUploaded = 0,
+        isDeleted = 0
     )
 }

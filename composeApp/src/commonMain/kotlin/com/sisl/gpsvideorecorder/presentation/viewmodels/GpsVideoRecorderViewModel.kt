@@ -1,16 +1,18 @@
 package com.sisl.gpsvideorecorder.presentation.viewmodels
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class GpsVideoRecorderViewModel(
@@ -20,37 +22,82 @@ class GpsVideoRecorderViewModel(
     private val _videoRecordingState = mutableStateOf(RecordingState.STOPPED)
     val videoRecordingState: State<RecordingState> = _videoRecordingState
 
-    private val _locations = mutableStateListOf<LocationData>()
-    val locations: List<LocationData> = _locations
+    private val _locations = MutableStateFlow<List<LocationData>>(emptyList())
+    val locations: StateFlow<List<LocationData>> = _locations
 
     private val _latestLocation = MutableStateFlow<LocationData?>(null)
     val latestLocation: StateFlow<LocationData?> = _latestLocation
 
+    private var currentVideoId: Long? = null // To store the ID of the ongoing recording
+    private var locationCollectionJob: Job? = null
+
 
     init {
         viewModelScope.launch {
-            locationRepository.locationUpdates.collect { location ->
-                _latestLocation.value = location
-                if (_videoRecordingState.value == RecordingState.RECORDING) {
-                    _locations.add(location)
-                    locationRepository.insertLocation(location)
-                }
-            }
+            getLastLocation()
         }
     }
 
     fun startGspVideoRecording(videoRecorder: VideoRecorder) {
-        _videoRecordingState.value = RecordingState.RECORDING
-        videoRecorder.startRecording()
-        locationRepository.startLocationTracking()
+        viewModelScope.launch {
+            try {
+                _videoRecordingState.value = RecordingState.RECORDING
+                videoRecorder.startRecording()
+                locationRepository.startLocationTracking()
+
+                currentVideoId = (latestLocation.value?.videoId ?: 0) + 1
+                locationCollectionJob?.cancel()
+                locationCollectionJob = launch {
+                    locationRepository.locationUpdates.collect { location ->
+                        location.videoId = currentVideoId ?: 1
+                        if (_videoRecordingState.value == RecordingState.RECORDING) {
+                            locationRepository.insertLocation(location.toEntity())
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                // Handle error starting recording (e.g., database error)
+                _videoRecordingState.value = RecordingState.STOPPED
+                // Optionally show an error message to the user
+                println("Error starting GPS video recording: ${e.message}")
+            }
+        }
     }
 
     fun stopGpsVideoRecording(videoRecorder: VideoRecorder) {
         _videoRecordingState.value = RecordingState.STOPPED
         videoRecorder.stopRecording()
         locationRepository.stopLocationTracking()
-//      saveGpsVideoRecordingWithLocation()
+
+        locationCollectionJob?.cancel()
+        currentVideoId = null
     }
 
+    fun getAllRecordedCoordinates() {
+        viewModelScope.launch {
+            locationRepository.getAllLocation()
+                .catch { e ->
+                    // Handle errors
+                    print("LocationVM Error loading locations")
+                }
+                .collect { locations ->
+                    _locations.value = locations
+                }
+        }
+    }
+
+    private fun getLastLocation() {
+        viewModelScope.launch {
+            locationRepository.getLastLocation()
+                .catch { e ->
+                    // Handle errors
+                    print("LocationVM Error loading locations")
+                }
+                .collect { locations ->
+                    _latestLocation.value = locations
+                }
+        }
+    }
 
 }

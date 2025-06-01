@@ -9,6 +9,7 @@ import platform.CoreLocation.CLLocation
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
 import platform.darwin.NSObject
 
 class IosLocationDataSource : LocationDataSource {
@@ -23,10 +24,10 @@ class IosLocationDataSource : LocationDataSource {
             val current = (didUpdateLocations.lastOrNull() as? CLLocation) ?: return
 
             val previous = lastLocation
-            if (previous == null || current.distanceFromLocation(previous) >= 2.0) {
-                lastLocation = current
-                _locationUpdates.tryEmit(current.toLocationData())
-            }
+//            if (previous == null || current.distanceFromLocation(previous) >= 2.0) {
+            lastLocation = current
+            _locationUpdates.tryEmit(current.toLocationData())
+//            }
         }
     }
 
@@ -49,15 +50,27 @@ class IosLocationDataSource : LocationDataSource {
 
         val latitude = coordinate.useContents { latitude }
         val longitude = coordinate.useContents { longitude }
+        val dateFormatter = NSDateFormatter().apply {
+            // Set a locale that won't interfere with your fixed format
+            locale = NSLocale(localeIdentifier = "en_US_POSIX")
+            dateFormat = "dd-MM-yyyy HH:mm:ss"
+            // Optional: If you want to ensure the time is in a specific timezone,
+            // otherwise it will use the device's current timezone.
+            // For UTC:
+            // timeZone = NSTimeZone.timeZoneForSecondsFromGMT(0)
+            // For device's system timezone (usually what you want unless you need consistency across devices):
+            // timeZone = NSTimeZone.systemTimeZone
+        }
+
+        val formattedTime = dateFormatter.stringFromDate(this.timestamp) ?: "N/A"
 
         return LocationData(
             latitude = latitude,
             longitude = longitude,
             timestamp = this.timestamp.timeIntervalSinceReferenceDate.toLong(),
-            time = NSDateFormatter().apply {
-                dateFormat = "dd-MM-yyyy HH:mm:ss" // Added time for better accuracy
-            }.stringFromDate(this.timestamp) ?: "N/A",
-            isUploaded = 0
+            time = formattedTime,
+            isUploaded = 0,
+            isDeleted = 0
         )
 
     }
