@@ -13,7 +13,6 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.FileOutputOptions
-import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.camera.video.Recorder
@@ -34,14 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.content.contentValuesOf
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
-import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
 import java.io.File
 
 // In commonMain
-actual class VideoRecorder actual constructor() {
+actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo) -> Unit) {
     private var cameraProvider: ProcessCameraProvider? = null
     private var recordingState = RecordingState.STOPPED
     lateinit var context: Context
@@ -75,17 +71,13 @@ actual class VideoRecorder actual constructor() {
     )
     actual fun startRecording() {
         if (!isInitialized || videoCapture == null) {
-            Log.e(
-                "VideoRecorder",
-                "Camera not ready - isInitialized: $isInitialized, videoCapture: $videoCapture"
-            )
             return
         }
 
         try {
             val videoFile = File(
                 context.getExternalFilesDir(Environment.DIRECTORY_MOVIES),
-                "video_${System.currentTimeMillis()}.mp4"
+                "android_video_${System.currentTimeMillis()}.mp4"
             )
             val outputOptions = FileOutputOptions.Builder(videoFile).build()
 
@@ -98,7 +90,10 @@ actual class VideoRecorder actual constructor() {
                         if (event.hasError()) {
                             Log.e("CameraRecorder", "Recording error: ${event.error}")
                         } else {
-                            Log.d("CameraRecorder", "Recording saved: ${event.outputResults.outputUri}")
+                            Log.d(
+                                "CameraRecorder",
+                                "Recording saved: ${event.outputResults.outputUri}"
+                            )
                             saveVideoToGallery(event.outputResults.outputUri)
                         }
                     }
@@ -169,9 +164,10 @@ actual class VideoRecorder actual constructor() {
 
     private fun saveVideoToGallery(videoUri: Uri) {
         try {
+            val videoName = "android_video_${System.currentTimeMillis()}.mp4"
             val resolver = context.contentResolver
             val contentValues = ContentValues().apply {
-                put(MediaStore.Video.Media.DISPLAY_NAME, "video_${System.currentTimeMillis()}.mp4")
+                put(MediaStore.Video.Media.DISPLAY_NAME, videoName)
                 put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
                 put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
             }
@@ -185,6 +181,15 @@ actual class VideoRecorder actual constructor() {
                     }
                     Toast.makeText(context, "Video saved to gallery", Toast.LENGTH_SHORT).show()
                 } ?: Log.e("CameraRecorder", "Failed to save video")
+
+
+            val videoRecodedInfo = VideoRecInfo(
+                videoUri = videoUri.toString(),
+                videoName = videoName
+            )
+
+            onVideoRecorded(videoRecodedInfo)
+
         } catch (ignore: Exception) {
         }
     }
@@ -192,10 +197,10 @@ actual class VideoRecorder actual constructor() {
 
 
 @Composable
-actual fun rememberVideoRecorder(): VideoRecorder {
+actual fun rememberVideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit): VideoRecorder {
     val context = LocalContext.current
     val recorder = remember {
-        VideoRecorder().apply {
+        VideoRecorder(onVideoRecorded).apply {
             this.context = context
         }
     }

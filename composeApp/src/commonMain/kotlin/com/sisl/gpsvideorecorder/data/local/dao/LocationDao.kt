@@ -28,16 +28,16 @@ interface LocationDao {
     @Query("SELECT * FROM locations ORDER BY timestamp DESC LIMIT 1")
     fun getLastLocation(): Flow<LocationEntity?>
 
-  /*  @Query(
-        """
-        SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS dateTime, 
-               COUNT(*) AS coordinateCount, isUploaded, isDeleted
-        FROM locations 
-        GROUP BY dateTime 
-        ORDER BY dateTime DESC
-    """
-    )
-    suspend fun getDateWisePendingLocationData(): List<VideoItem>*/
+    /*  @Query(
+          """
+          SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS dateTime,
+                 COUNT(*) AS coordinateCount, isUploaded, isDeleted
+          FROM locations
+          GROUP BY dateTime
+          ORDER BY dateTime DESC
+      """
+      )
+      suspend fun getDateWisePendingLocationData(): List<VideoItem>*/
     @Query(
         """
         SELECT videoId, strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') AS dateTime, 
@@ -85,6 +85,9 @@ interface LocationDao {
 
     @Query("DELETE FROM locations where videoId = :videoId")
     suspend fun deleteDataBasedOnVideoId(videoId: Long)
+
+    @Query("UPDATE locations SET videoName = :videoName, videoPath = :videoPath WHERE videoId = :videoId")
+    suspend fun updateLocationWithVideoName(videoId: Long, videoName: String, videoPath: String)
 
 
 }

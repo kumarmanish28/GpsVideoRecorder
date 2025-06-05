@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.2"
+agp = "8.10.0"
 android-compileSdk = "35"
 android-minSdk = "24"
 android-targetSdk = "35"
@@ -12,26 +12,27 @@ androidx-lifecycle = "2.8.4"
 androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.7.3"
 junit = "4.13.2"
-kotlin = "2.1.10"
+kotlin = "2.1.21"
 material3Android = "1.3.2"
 cameraVideo = "1.4.2"
 cameraLifecycle = "1.4.2"
 cameraView = "1.4.2"
-animationAndroid = "1.8.0"
+animationAndroid = "1.8.2"
 
 ktor = "3.1.2"
 
-kotlinxDatetime = "0.6.0"
+kotlinxDatetime = "0.6.1"
 material3WindowSize = "1.7.1"
 navigationCompose = "2.8.0-alpha10"
 koin = "4.0.0"
-ksp = "2.1.0-1.0.29"
-sqlite = "2.5.0"
+ksp = "2.1.21-2.0.1"
+sqlite = "2.5.1"
 room = "2.7.1"
-dataStore="1.1.5"
+dataStore="1.1.7"
 playServicesLocation = "21.3.0"
 
 compottie="2.0.0-rc04"
+napier_version="2.7.1"
 
 [libraries]
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraVideo" }
@@ -84,6 +85,7 @@ compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "comp
 compottie-dot = { module = "io.github.alexzhirkevich:compottie-dot", version.ref = "compottie" }
 compottie-network = { module = "io.github.alexzhirkevich:compottie-network", version.ref = "compottie" }
 compottie-resources = { module = "io.github.alexzhirkevich:compottie-resources", version.ref = "compottie" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier_version" }
 
 
 [plugins]

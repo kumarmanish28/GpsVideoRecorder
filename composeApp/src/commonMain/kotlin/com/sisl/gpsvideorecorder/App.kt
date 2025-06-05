@@ -1,5 +1,10 @@
 package com.sisl.gpsvideorecorder
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,18 +27,76 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     val navController = rememberNavController()
+    val defaultEnterTransitionDuration = 300
+    val defaultExitTransitionDuration = 200
 
     MyTheme {
         NavHost(
             navController = navController,
             startDestination = Routes.SPLASH
         ) {
-            composable(Routes.SPLASH) {
+            composable(
+                Routes.SPLASH, enterTransition = {
+                    // When navigating TO VideoHistoryScreen
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth }, // Slide in from the right
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                exitTransition = {
+                    // When navigating AWAY FROM VideoHistoryScreen
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth }, // Slide out to the left
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                },
+                popEnterTransition = {
+                    // When returning TO VideoHistoryScreen via back press/pop
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                popExitTransition = {
+                    // When VideoHistoryScreen is popped FROM the back stack
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth }, // Slide out to the right
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                }) {
                 SplashScreen {
                     navController.navigate(Routes.LOGIN)
                 }
             }
-            composable(Routes.LOGIN) {
+            composable(
+                Routes.LOGIN, enterTransition = {
+                    // When navigating TO VideoHistoryScreen
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth }, // Slide in from the right
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                exitTransition = {
+                    // When navigating AWAY FROM VideoHistoryScreen
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth }, // Slide out to the left
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                },
+                popEnterTransition = {
+                    // When returning TO VideoHistoryScreen via back press/pop
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                popExitTransition = {
+                    // When VideoHistoryScreen is popped FROM the back stack
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth }, // Slide out to the right
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                }) {
                 LoginScreen {
                     navController.navigate(Routes.VIDEO_RECORDING) {
                         popUpTo(Routes.SPLASH) {
@@ -42,7 +105,36 @@ fun App() {
                     }
                 }
             }
-            composable(Routes.VIDEO_RECORDING) {
+            composable(
+                Routes.VIDEO_RECORDING,
+                enterTransition = {
+                    // When navigating TO VideoRecordingScreen
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth }, // Slide in from the right
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                exitTransition = {
+                    // When navigating AWAY FROM VideoRecordingScreen (e.g., to VideoHistory)
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth }, // Slide out to the left
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                },
+                popEnterTransition = {
+                    // When returning TO VideoRecordingScreen via back press/pop
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                popExitTransition = {
+                    // When VideoRecordingScreen is popped FROM the back stack
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth }, // Slide out to the right
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                }) {
                 VideoRecordingScreen {
                     when (it) {
                         Routes.VIDEO_HISTORY -> {
@@ -56,7 +148,36 @@ fun App() {
 
                 }
             }
-            composable(Routes.VIDEO_HISTORY) {
+            composable(
+                Routes.VIDEO_HISTORY,
+                enterTransition = {
+                    // When navigating TO VideoHistoryScreen
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth }, // Slide in from the right
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                exitTransition = {
+                    // When navigating AWAY FROM VideoHistoryScreen
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth }, // Slide out to the left
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                },
+                popEnterTransition = {
+                    // When returning TO VideoHistoryScreen via back press/pop
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                popExitTransition = {
+                    // When VideoHistoryScreen is popped FROM the back stack
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth }, // Slide out to the right
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                }) {
                 VideoHistoryScreen()
             }
         }

@@ -15,7 +15,9 @@ data class LocationEntity(
     var isDeleted: Int,
     var speed: Int = 0,
     val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
-    val videoId: Long = 0
+    val videoId: Long = 0,
+    val videoName: String = "",
+    val videoPath: String = ""
 )
 
 fun LocationData.toEntity() = LocationEntity(

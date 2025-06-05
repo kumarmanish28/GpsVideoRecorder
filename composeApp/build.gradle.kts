@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -77,6 +75,7 @@ kotlin {
             implementation(libs.compottie.resources)
             implementation(libs.compottie.dot)
             implementation(libs.compottie.network)
+            implementation(libs.napier)
             api(libs.koin.core)
 
             implementation(libs.bundles.ktor)

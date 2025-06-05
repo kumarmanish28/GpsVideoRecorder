@@ -17,6 +17,8 @@ interface LocationRepository {
     suspend fun getLastLocation(): Flow<LocationData?>
     suspend fun getRecordForVideoHistory(): List<VideoItem>
 
+    suspend fun updateLocationWithVideoName(videoId: Long, videoName: String, videoPath: String)
+
     // Networking Operation
 //    suspend fun uploadLocation(videoId: Long): Result<Unit>
 //    suspend fun deleteLocation(videoId: Long): Result<Unit>

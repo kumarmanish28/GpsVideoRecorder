@@ -48,6 +48,14 @@ class LocationRepositoryImpl(private val dao: LocationDao) : LocationRepository,
         return dao.getDateWisePendingLocationData()
     }
 
+    override suspend fun updateLocationWithVideoName(
+        videoId: Long,
+        videoName: String,
+        videoPath: String
+    ) {
+        dao.updateLocationWithVideoName(videoId, videoName, videoPath)
+    }
+
 //    // Networking Operations
 //    override suspend fun uploadLocation(videoId: Long): Result<Unit> {
 ////        TODO("Not yet implemented")

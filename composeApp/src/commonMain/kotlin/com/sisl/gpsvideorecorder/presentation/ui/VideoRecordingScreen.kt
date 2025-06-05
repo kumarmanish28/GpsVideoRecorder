@@ -44,8 +44,13 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun VideoRecordingScreen(viewModel: GpsVideoRecorderViewModel = koinInject(), onNext: (String) -> Unit) {
-    val recorder = rememberVideoRecorder()
+fun VideoRecordingScreen(
+    viewModel: GpsVideoRecorderViewModel = koinInject(),
+    onNext: (String) -> Unit
+) {
+    val recorder = rememberVideoRecorder(onVideoRecorded = { result ->
+        viewModel.onRecordingComplete(result)
+    })
     val currentLocation by viewModel.latestLocation.collectAsStateWithLifecycle()
     val composition by rememberLottieComposition {
         LottieCompositionSpec.JsonString(
@@ -142,6 +147,9 @@ fun VideoRecordingScreen(viewModel: GpsVideoRecorderViewModel = koinInject(), on
                             btnName = "History",
                             icon = Res.drawable.compose_multiplatform
                         ) {
+                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
+                                viewModel.stopGpsVideoRecording(recorder)
+                            }
                             onNext.invoke(Routes.VIDEO_HISTORY)
                         }
                     }

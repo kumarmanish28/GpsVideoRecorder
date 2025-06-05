@@ -39,7 +39,7 @@ import platform.UIKit.UIDeviceOrientationDidChangeNotification
 import platform.UIKit.UIView
 import platform.darwin.NSObject
 
-actual class VideoRecorder actual constructor() {
+actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo) -> Unit) {
     private val captureSession = AVCaptureSession().apply {
         usesApplicationAudioSession = true
     }
@@ -115,8 +115,9 @@ actual class VideoRecorder actual constructor() {
     actual fun startRecording() {
         if (!isInitialized) return
 
+        val videoName = "ios_video_${NSDate().timeIntervalSince1970}.mp4"
         val outputPath =
-            NSHomeDirectory() + "/Documents/video_${NSDate().timeIntervalSince1970}.mp4"
+            NSHomeDirectory() + "/Documents/$videoName"
         videoOutput.startRecordingToOutputFileURL(
             outputFileURL = NSURL.fileURLWithPath(outputPath),
             recordingDelegate = object : NSObject(), AVCaptureFileOutputRecordingDelegateProtocol {
@@ -131,6 +132,11 @@ actual class VideoRecorder actual constructor() {
                         RecordingState.STOPPED
                     } else {
                         println("Recording saved to: ${didFinishRecordingToOutputFileAtURL.path}")
+                        val videoRecInfo = VideoRecInfo(
+                            videoUri = outputPath,
+                            videoName = videoName
+                        )
+                        onVideoRecorded(videoRecInfo)
                         RecordingState.STOPPED
                     }
                 }
@@ -163,7 +169,8 @@ actual class VideoRecorder actual constructor() {
 
             // Audio input
             val audioDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
-            val audioInput = audioDevice?.let { AVCaptureDeviceInput.deviceInputWithDevice(it, null) }
+            val audioInput =
+                audioDevice?.let { AVCaptureDeviceInput.deviceInputWithDevice(it, null) }
             if (audioInput != null && captureSession.canAddInput(audioInput)) {
                 captureSession.addInput(audioInput)
             }
@@ -193,7 +200,8 @@ actual class VideoRecorder actual constructor() {
 }
 
 @Composable
-actual fun rememberVideoRecorder(): VideoRecorder {
+actual fun rememberVideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit): VideoRecorder {
 //    return remember { VideoRecorder().also { it.initialize() } }
-    return remember { VideoRecorder()}
+    return remember { VideoRecorder(onVideoRecorded) }
 }
+

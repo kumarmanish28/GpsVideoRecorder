@@ -4,6 +4,7 @@ import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
+import androidx.room.migration.Migration
 import com.sisl.gpsvideorecorder.data.local.dao.LocationDao
 import com.sisl.gpsvideorecorder.data.local.entities.LocationEntity
 

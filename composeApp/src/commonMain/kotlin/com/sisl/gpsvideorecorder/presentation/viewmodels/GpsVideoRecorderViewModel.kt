@@ -8,6 +8,7 @@ import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
+import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecInfo
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,8 +71,7 @@ class GpsVideoRecorderViewModel(
         videoRecorder.stopRecording()
         locationRepository.stopLocationTracking()
 
-        locationCollectionJob?.cancel()
-        currentVideoId = null
+
     }
 
     fun getAllRecordedCoordinates() {
@@ -100,4 +100,21 @@ class GpsVideoRecorderViewModel(
         }
     }
 
+    fun onRecordingComplete(result: VideoRecInfo) {
+        val videoId = currentVideoId
+        val videoName = result.videoName
+        val videoPath = result.videoUri
+        viewModelScope.launch {
+            if (videoId != null) {
+                locationRepository.updateLocationWithVideoName(
+                    videoId,
+                    videoName ?: "",
+                    videoPath ?: ""
+                )
+            }
+        }
+
+        locationCollectionJob?.cancel()
+        currentVideoId = null
+    }
 }
