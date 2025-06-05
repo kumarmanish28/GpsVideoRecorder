@@ -47,6 +47,8 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
     private var previewLayer: AVCaptureVideoPreviewLayer? = null
     private var recordingState = RecordingState.STOPPED
     private var isInitialized = false
+    private var videoFileName: String? = null
+
 
     actual fun initialize(onReady: () -> Unit) {
         configureCaptureSession()
@@ -115,9 +117,9 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
     actual fun startRecording() {
         if (!isInitialized) return
 
-        val videoName = "ios_video_${NSDate().timeIntervalSince1970}.mp4"
+        videoFileName = "ios_video_${NSDate().timeIntervalSince1970}.mp4"
         val outputPath =
-            NSHomeDirectory() + "/Documents/$videoName"
+            NSHomeDirectory() + "/Documents/$videoFileName"
         videoOutput.startRecordingToOutputFileURL(
             outputFileURL = NSURL.fileURLWithPath(outputPath),
             recordingDelegate = object : NSObject(), AVCaptureFileOutputRecordingDelegateProtocol {
@@ -134,7 +136,7 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
                         println("Recording saved to: ${didFinishRecordingToOutputFileAtURL.path}")
                         val videoRecInfo = VideoRecInfo(
                             videoUri = outputPath,
-                            videoName = videoName
+                            videoName = videoFileName
                         )
                         onVideoRecorded(videoRecInfo)
                         RecordingState.STOPPED

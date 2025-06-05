@@ -46,6 +46,7 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
     private var preview: Preview? = null
     private var isInitialized by mutableStateOf(false)
     private var cameraSelector: CameraSelector? = null
+    private var videoFileName: String? = null
     actual fun initialize(onReady: () -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
@@ -75,9 +76,10 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
         }
 
         try {
+            videoFileName = "android_video_${System.currentTimeMillis()}.mp4"
             val videoFile = File(
                 context.getExternalFilesDir(Environment.DIRECTORY_MOVIES),
-                "android_video_${System.currentTimeMillis()}.mp4"
+                videoFileName!!
             )
             val outputOptions = FileOutputOptions.Builder(videoFile).build()
 
@@ -164,10 +166,9 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
 
     private fun saveVideoToGallery(videoUri: Uri) {
         try {
-            val videoName = "android_video_${System.currentTimeMillis()}.mp4"
             val resolver = context.contentResolver
             val contentValues = ContentValues().apply {
-                put(MediaStore.Video.Media.DISPLAY_NAME, videoName)
+                put(MediaStore.Video.Media.DISPLAY_NAME, videoFileName!!)
                 put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
                 put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
             }
@@ -185,7 +186,7 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
 
             val videoRecodedInfo = VideoRecInfo(
                 videoUri = videoUri.toString(),
-                videoName = videoName
+                videoName = videoFileName!!
             )
 
             onVideoRecorded(videoRecodedInfo)
@@ -204,7 +205,6 @@ actual fun rememberVideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit): Video
             this.context = context
         }
     }
-
     LaunchedEffect(Unit) {
         recorder.initialize()
     }
