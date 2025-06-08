@@ -178,7 +178,7 @@ fun App() {
                         animationSpec = tween(defaultExitTransitionDuration)
                     ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
                 }) {
-                VideoHistoryScreen()
+                VideoHistoryScreen(navController)
             }
         }
     }

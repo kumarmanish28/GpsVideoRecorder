@@ -21,10 +21,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +39,9 @@ import com.sisl.gpsvideorecorder.CremeColor
 import com.sisl.gpsvideorecorder.MyAppTypography
 import com.sisl.gpsvideorecorder.PrimaryColor
 import com.sisl.gpsvideorecorder.Routes
+import com.sisl.gpsvideorecorder.data.UploadingState
+import com.sisl.gpsvideorecorder.getPlatform
+import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
 import com.sisl.gpsvideorecorder.presentation.components.recorder.rememberVideoRecorder
 import com.sisl.gpsvideorecorder.presentation.viewmodels.GpsVideoRecorderViewModel
@@ -50,6 +55,7 @@ import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
+import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -65,12 +71,14 @@ fun VideoRecordingScreen(
     val recorder = rememberVideoRecorder(onVideoRecorded = { result ->
         viewModel.onRecordingComplete(result)
     })
-  val currentLocation by viewModel.latestLocation.collectAsStateWithLifecycle()
+    val currentLocation by viewModel.latestLocation.collectAsStateWithLifecycle()
     /*   val composition by rememberLottieComposition {
          LottieCompositionSpec.JsonString(
              Res.readBytes("files/video_recorder_anim.json").decodeToString()
          )
      }*/
+
+    val uploadingState = remember { viewModel.uploadAllPendingCoordinates }
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -85,6 +93,36 @@ fun VideoRecordingScreen(
                         .fillMaxSize()
                         .background(Color.Black)
                 )
+
+                when (uploadingState.value) {
+                    UploadingState.LOADING -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    UploadingState.SUCCESS -> {
+                        MessageDialog(
+                            modifier = Modifier.height(220.dp).width(280.dp),
+                            isSuccessDialog = true, message = "Upload Successfully", onDismiss = {
+                                viewModel.uploadAllPendingCoordinates.value =
+                                    UploadingState.NULL
+                            })
+                    }
+
+                    UploadingState.FAILED -> {
+                        MessageDialog(
+                            modifier = Modifier.height(220.dp).width(280.dp),
+                            isSuccessDialog = true, message = "Uploading Failed", onDismiss = {
+                                viewModel.uploadAllPendingCoordinates.value =
+                                    UploadingState.NULL
+                            })
+                    }
+
+                    UploadingState.NULL -> {}
+                }
             }
 
             Box(
@@ -104,7 +142,7 @@ fun VideoRecordingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         val fadeDuration = 500 // 1 second for each fade in/out
@@ -161,7 +199,7 @@ fun VideoRecordingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         CustomButton(
@@ -171,7 +209,7 @@ fun VideoRecordingScreen(
                             btnName = "Upload",
                             icon = Res.drawable.upload,
                         ) {
-                            onNext.invoke(Routes.UPLOAD)
+                            viewModel.onUploadClicked()
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         CustomButton(
@@ -190,21 +228,7 @@ fun VideoRecordingScreen(
                 }
             }
         }
-        /* if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
-             Image(
-                 painter = rememberLottiePainter(
-                     composition = composition,
-                     iterations = Compottie.IterateForever
-                 ),
-                 contentDescription = "Lottie animation",
-                 modifier = Modifier
-                     .size(100.dp)
-                     .align(Alignment.TopEnd)
-                     .padding(top = 16.dp, end = 16.dp)
-             )
-         }*/
     }
-
 }
 
 @Composable
@@ -215,6 +239,8 @@ fun CustomButton(
     alpha: Float = 1f,
     onClick: () -> Unit
 ) {
+    /*   val platFormName = remember { getPlatform().name }
+           .height(if (platFormName == "iOS") 160.dp else 120.dp),*/
     Card(
         modifier = modifier.background(Color.White),
         shape = RoundedCornerShape(10.dp)
@@ -231,9 +257,10 @@ fun CustomButton(
                 painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(28.dp)
-                    .graphicsLayer { this.alpha = alpha }
+                    .graphicsLayer { this.alpha = alpha },
+                tint = Color.White
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = btnName,
                 color = Color.Green,

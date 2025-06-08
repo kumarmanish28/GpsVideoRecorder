@@ -4,8 +4,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sisl.gpsvideorecorder.data.UploadingState
 import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
+import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
@@ -15,7 +17,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GpsVideoRecorderViewModel(
@@ -30,6 +31,11 @@ class GpsVideoRecorderViewModel(
 
     private val _latestLocation = MutableStateFlow<LocationData?>(null)
     val latestLocation: StateFlow<LocationData?> = _latestLocation
+
+
+    private val _uploadAllPendingCoordinates = mutableStateOf(UploadingState.NULL)
+    val uploadAllPendingCoordinates = _uploadAllPendingCoordinates
+
 
     private var currentVideoId: Long? = null // To store the ID of the ongoing recording
     private var locationCollectionJob: Job? = null
@@ -122,64 +128,25 @@ class GpsVideoRecorderViewModel(
 
     fun onUploadClicked() {
         viewModelScope.launch {
-            viewModelScope.launch {
-                try {
-                    locationRepository.uploadLocation(null).collect { response ->
-                        when (response) {
-                            is ApiResponse.Success -> {
-                                /* _uiState.update { currentState ->
-                                     currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-                                         if (videoItem.videoId == videoId) videoItem.copy(isUploaded = false) else videoItem
-                                     }, errorMessage = null)
-                                 }*/
-                            }
+            try {
+                locationRepository.uploadLocation(null).collect { response ->
+                    when (response) {
+                        is ApiResponse.Success -> {
+                            _uploadAllPendingCoordinates.value = UploadingState.SUCCESS
+                        }
 
-                            is ApiResponse.Error -> {
-                                /* _uiState.update { currentState ->
-                                     currentState.copy(
-                                         videoItemsList = currentState.videoItemsList.map { videoItem ->
-                                             if (videoItem.videoId == videoId) {
-                                                 videoItem.copy(isUploaded = false) // Revert the optimistic update
-                                             } else {
-                                                 videoItem
-                                             }
-                                         },
-                                         errorMessage = response.message
-                                     )
-                                 }*/
-                            }
+                        is ApiResponse.Error -> {
+                            _uploadAllPendingCoordinates.value = UploadingState.FAILED
+                        }
 
-                            is ApiResponse.Loading -> {
-                                /*_uiState.update { currentState ->
-                                    currentState.copy(
-                                        videoItemsList = currentState.videoItemsList.map { videoItem ->
-                                            if (videoItem.videoId == videoId) {
-                                                videoItem.copy(isUploaded = true)
-                                            } else {
-                                                videoItem
-                                            }
-                                        }
-                                    )
-                                }*/
-                            }
+                        is ApiResponse.Loading -> {
+                            _uploadAllPendingCoordinates.value = UploadingState.LOADING
                         }
                     }
-                } catch (ex: Exception) {
-                    /*_uiState.update { currentState ->
-                        currentState.copy(
-                            videoItemsList = currentState.videoItemsList.map { videoItem ->
-                                if (videoItem.videoId == videoId) {
-                                    videoItem.copy(isUploaded = false)
-                                } else {
-                                    videoItem
-                                }
-                            },
-                            errorMessage = ex.message ?: "An unexpected error occurred"
-                        )
-                    }*/
                 }
+            } catch (ex: Exception) {
+                _uploadAllPendingCoordinates.value = UploadingState.FAILED
             }
-
         }
     }
 

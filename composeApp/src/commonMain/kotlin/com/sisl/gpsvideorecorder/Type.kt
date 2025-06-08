@@ -18,10 +18,6 @@ import androidx.compose.material3.Typography
 @Composable
 fun MyAppTypography(): Typography {
 
-    val nicomojiRegular = FontFamily(
-        Font(Res.font.nicomoji_regular, FontWeight.Normal)
-    )
-
     val montserratBold = FontFamily(
         Font(Res.font.montserrat_bold, FontWeight.Bold)
     )

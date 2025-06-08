@@ -34,7 +34,7 @@ import com.sisl.gpsvideorecorder.PrimaryColor
 import com.sisl.gpsvideorecorder.presentation.components.EditTextField
 import com.sisl.gpsvideorecorder.presentation.components.RedButtonCTA
 import gpsvideorecorder.composeapp.generated.resources.Res
-import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
+import gpsvideorecorder.composeapp.generated.resources.ic_next
 import gpsvideorecorder.composeapp.generated.resources.ic_login_bg
 import org.jetbrains.compose.resources.painterResource
 
@@ -129,7 +129,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 50.dp)
-                .height(45.dp)
+                .height(48.dp)
                 .align(Alignment.BottomCenter),
             onButtonClicked = {
                 // Add basic validation
@@ -138,7 +138,7 @@ fun LoginScreen(
                 }
             },
             buttonText = "Login",
-            drawableIcon = Res.drawable.compose_multiplatform
+            drawableIcon = Res.drawable.ic_next
         )
     }
 }
