@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sisl.gpsvideorecorder.data.local.entities.toEntity
+import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
@@ -14,10 +15,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GpsVideoRecorderViewModel(
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
 ) : ViewModel() {
 
     private val _videoRecordingState = mutableStateOf(RecordingState.STOPPED)
@@ -117,4 +119,68 @@ class GpsVideoRecorderViewModel(
         locationCollectionJob?.cancel()
         currentVideoId = null
     }
+
+    fun onUploadClicked() {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                try {
+                    locationRepository.uploadLocation(null).collect { response ->
+                        when (response) {
+                            is ApiResponse.Success -> {
+                                /* _uiState.update { currentState ->
+                                     currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                         if (videoItem.videoId == videoId) videoItem.copy(isUploaded = false) else videoItem
+                                     }, errorMessage = null)
+                                 }*/
+                            }
+
+                            is ApiResponse.Error -> {
+                                /* _uiState.update { currentState ->
+                                     currentState.copy(
+                                         videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                             if (videoItem.videoId == videoId) {
+                                                 videoItem.copy(isUploaded = false) // Revert the optimistic update
+                                             } else {
+                                                 videoItem
+                                             }
+                                         },
+                                         errorMessage = response.message
+                                     )
+                                 }*/
+                            }
+
+                            is ApiResponse.Loading -> {
+                                /*_uiState.update { currentState ->
+                                    currentState.copy(
+                                        videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                            if (videoItem.videoId == videoId) {
+                                                videoItem.copy(isUploaded = true)
+                                            } else {
+                                                videoItem
+                                            }
+                                        }
+                                    )
+                                }*/
+                            }
+                        }
+                    }
+                } catch (ex: Exception) {
+                    /*_uiState.update { currentState ->
+                        currentState.copy(
+                            videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                if (videoItem.videoId == videoId) {
+                                    videoItem.copy(isUploaded = false)
+                                } else {
+                                    videoItem
+                                }
+                            },
+                            errorMessage = ex.message ?: "An unexpected error occurred"
+                        )
+                    }*/
+                }
+            }
+
+        }
+    }
+
 }

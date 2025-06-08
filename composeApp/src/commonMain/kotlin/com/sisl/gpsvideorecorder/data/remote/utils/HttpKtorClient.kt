@@ -1,4 +1,4 @@
-package com.sisl.gpsvideorecorder.data.remote
+package com.sisl.gpsvideorecorder.data.remote.utils
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout

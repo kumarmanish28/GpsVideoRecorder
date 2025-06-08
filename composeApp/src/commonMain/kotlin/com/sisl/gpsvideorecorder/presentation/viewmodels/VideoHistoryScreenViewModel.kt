@@ -2,6 +2,7 @@ package com.sisl.gpsvideorecorder.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.state.VideoHistoryUiState
 import kotlinx.coroutines.delay
@@ -15,7 +16,6 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
 
     private val _uiState = MutableStateFlow(VideoHistoryUiState())
     val uiState: StateFlow<VideoHistoryUiState> = _uiState.asStateFlow()
-
 
     init {
         loadVideoHistoryData()
@@ -38,26 +38,65 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
 
     fun onUploadClicked(videoId: Long) {
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    videoItemsList = currentState.videoItemsList.map { videoItem ->
-                        if (videoItem.videoId == videoId) {
-                            videoItem.copy(isUploaded = true)
-                        } else {
-                            videoItem
+            try {
+                repository.uploadLocation(videoId).collect { response ->
+                    when (response) {
+                        is ApiResponse.Success -> {
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                        if (videoItem.videoId == videoId) videoItem.copy(isUploaded = false) else videoItem
+                                    }, errorMessage = null,
+                                    successMessage = "Video Data uploaded successfully"
+                                )
+                            }
+                        }
+
+                        is ApiResponse.Error -> {
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                        if (videoItem.videoId == videoId) {
+                                            videoItem.copy(isUploaded = false) // Revert the optimistic update
+                                        } else {
+                                            videoItem
+                                        }
+                                    },
+                                    errorMessage = response.message,
+                                    successMessage = null
+                                )
+                            }
+                        }
+
+                        is ApiResponse.Loading -> {
+                            _uiState.update { currentState ->
+                                currentState.copy(
+                                    videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                        if (videoItem.videoId == videoId) {
+                                            videoItem.copy(isUploaded = true)
+                                        } else {
+                                            videoItem
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
-                )
+                }
+            } catch (ex: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        videoItemsList = currentState.videoItemsList.map { videoItem ->
+                            if (videoItem.videoId == videoId) {
+                                videoItem.copy(isUploaded = false)
+                            } else {
+                                videoItem
+                            }
+                        },
+                        errorMessage = ex.message ?: "An unexpected error occurred"
+                    )
+                }
             }
-
-            delay(2000)
-
-            _uiState.update { currentState ->
-                currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-                    if (videoItem.videoId == videoId) videoItem.copy(isUploaded = false) else videoItem
-                }, errorMessage = null)
-            }
-
         }
     }
 
@@ -77,5 +116,10 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
             }
         }
     }
+
+    fun clearSuccessMessage() {
+        _uiState.update { it.copy(successMessage = null) }
+    }
+
 
 }

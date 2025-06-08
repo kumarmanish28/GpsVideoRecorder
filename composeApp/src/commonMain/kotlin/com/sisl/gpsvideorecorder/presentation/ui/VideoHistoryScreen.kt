@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sisl.gpsvideorecorder.MintGreen
 import com.sisl.gpsvideorecorder.data.local.models.DateWisePendingLocation
+import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.state.VideoItem
 import com.sisl.gpsvideorecorder.presentation.viewmodels.VideoHistoryScreenViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
@@ -129,6 +130,16 @@ fun VideoHistoryScreen(
                     Text(text = "No Video History Found.")
                 }
             } else {
+                if (uiState.successMessage != null) {
+                    MessageDialog(
+                        isSuccessDialog = true,
+                        message = uiState.successMessage!!,
+                        onDismiss = {
+                            videoModel.clearSuccessMessage() // Clear dialog after dismiss
+                        }
+                    )
+                }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -138,7 +149,9 @@ fun VideoHistoryScreen(
                     itemsIndexed(uiState.videoItemsList) { index, item ->
                         VideoHistoryItemRow(
                             item = item,
-                            onUploadClicked = { videoModel.onUploadClicked(item.videoId) },
+                            onUploadClicked = {
+                                videoModel.onUploadClicked(item.videoId)
+                            },
                             onDeleteClicked = { videoModel.onDeleteClicked(item.videoId) }
                         )
                         if (index < uiState.videoItemsList.lastIndex) {

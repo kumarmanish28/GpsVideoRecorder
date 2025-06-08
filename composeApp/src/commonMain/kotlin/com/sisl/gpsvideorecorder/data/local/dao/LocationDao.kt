@@ -59,6 +59,9 @@ interface LocationDao {
     @Query("SELECT * FROM locations where videoId = :videoId")
     suspend fun getAllLocationsBasedOnVideoId(videoId: Long): List<LocationEntity>
 
+    @Query("SELECT * FROM locations where isUploaded = 0")
+    suspend fun getAllPendingLocations(): List<LocationEntity>
+
     @Query("DELETE FROM locations where strftime('%d-%m-%Y', timestamp / 1000, 'unixepoch', 'localtime') = :date")
     suspend fun clearLocationsDateWise(date: String)
 

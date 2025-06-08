@@ -28,11 +28,13 @@ koin = "4.0.0"
 ksp = "2.1.21-2.0.1"
 sqlite = "2.5.1"
 room = "2.7.1"
-dataStore="1.1.7"
+dataStore = "1.1.7"
 playServicesLocation = "21.3.0"
 
-compottie="2.0.0-rc04"
-napier_version="2.7.1"
+compottie = "2.0.0-rc04"
+napier_version = "2.7.1"
+serialization_version = "1.8.0"
+serialization_plugin_version= "2.1.21"
 
 [libraries]
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraVideo" }
@@ -61,6 +63,7 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 jetbrains-compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+jetbrains-common-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization_version" }
 
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
@@ -99,6 +102,7 @@ ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
+serialization = { id = "plugin.serialization", version.ref = "serialization_plugin_version" }
 
 [bundles]
 ktor = [

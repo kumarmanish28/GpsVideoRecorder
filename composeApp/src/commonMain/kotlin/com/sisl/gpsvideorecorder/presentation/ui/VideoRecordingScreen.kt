@@ -107,8 +107,8 @@ fun VideoRecordingScreen(
                             .padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        val fadeDuration = 1000 // 1 second for each fade in/out
-                        val minAlpha = 0.3f
+                        val fadeDuration = 500 // 1 second for each fade in/out
+                        val minAlpha = 0.25f
                         val maxAlpha = 1f
                         val infiniteTransition = rememberInfiniteTransition()
                         val alpha: Float =

@@ -28,7 +28,9 @@ fun LocationData.toEntity() = LocationEntity(
     speed = speed,
     time = time,
     isUploaded = isUploaded,
-    isDeleted = isUploaded
+    isDeleted = isUploaded,
+    videoName = videoName,
+    videoPath = videoPath
 )
 
 fun LocationEntity.toDomain() = LocationData(
@@ -39,5 +41,6 @@ fun LocationEntity.toDomain() = LocationData(
     speed = speed,
     time = time,
     isUploaded = isUploaded,
-    isDeleted = isDeleted
+    isDeleted = isDeleted,
+    videoPath = videoPath
 )
