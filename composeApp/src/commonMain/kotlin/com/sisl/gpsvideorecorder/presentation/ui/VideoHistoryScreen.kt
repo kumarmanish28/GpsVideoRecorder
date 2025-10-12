@@ -233,18 +233,18 @@ fun VideoHistoryItemRow(
         }
 
         Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-//            if (item.isDeleted) {
-////                CircularProgressIndicator(
-////                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
-////                )
-//            } else {
+            if (item.isDeleted) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
+                )
+            } else {
                 Image(
                     painter = painterResource(Res.drawable.ic_delete), // Replace with your delete icon
                     contentDescription = "Delete Data for V${item.videoId}",
                     modifier = Modifier.size(20.dp).clickable(onClick = onDeleteClicked),
                     colorFilter = ColorFilter.tint(Color.Red)
                 )
-//            }
+            }
         }
     }
 }

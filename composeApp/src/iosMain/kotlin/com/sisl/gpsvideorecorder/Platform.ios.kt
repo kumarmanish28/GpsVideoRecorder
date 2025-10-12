@@ -8,3 +8,6 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+actual fun getAppVersion(): String {
+    TODO("Not yet implemented")
+}

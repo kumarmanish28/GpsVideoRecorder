@@ -8,6 +8,7 @@ import com.sisl.gpsvideorecorder.data.remote.utils.createHttpClient
 import com.sisl.gpsvideorecorder.data.repositories.LocationRepositoryImpl
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.viewmodels.GpsVideoRecorderViewModel
+import com.sisl.gpsvideorecorder.presentation.viewmodels.LoginScreenViewModel
 import com.sisl.gpsvideorecorder.presentation.viewmodels.VideoHistoryScreenViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
@@ -20,4 +21,5 @@ val locationModule = module {
     single<LocationRepository> { LocationRepositoryImpl(get(), get()) }
     viewModel { GpsVideoRecorderViewModel(get()) }
     viewModel { VideoHistoryScreenViewModel(get()) }
+    viewModel { LoginScreenViewModel(get()) }
 }

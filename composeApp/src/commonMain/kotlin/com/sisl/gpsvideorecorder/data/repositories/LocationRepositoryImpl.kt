@@ -8,6 +8,8 @@ import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.data.remote.utils.ApiService
 import com.sisl.gpsvideorecorder.domain.models.LocationData
+import com.sisl.gpsvideorecorder.domain.models.LoginRequest
+import com.sisl.gpsvideorecorder.domain.models.LoginResponse
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.state.VideoItem
 import kotlinx.coroutines.flow.Flow
@@ -93,5 +95,9 @@ class LocationRepositoryImpl(private val dao: LocationDao, private val apiServic
         } catch (ex: Exception) {
             emit(ApiResponse.Error(ex.message ?: "No data found", 409))
         }
+    }
+
+    override suspend fun userLogin(request: LoginRequest): Flow<ApiResponse<LoginResponse>> {
+        return apiService.userLogin(request)
     }
 }

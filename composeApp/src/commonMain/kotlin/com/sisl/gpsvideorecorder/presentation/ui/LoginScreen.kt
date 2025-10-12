@@ -12,13 +12,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,21 +36,53 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sisl.gpsvideorecorder.CheckBoxBorderColor
+import com.sisl.gpsvideorecorder.MyAppTypography
 import com.sisl.gpsvideorecorder.PrimaryColor
+import com.sisl.gpsvideorecorder.data.UploadingState
+import com.sisl.gpsvideorecorder.getAppVersion
 import com.sisl.gpsvideorecorder.presentation.components.EditTextField
+import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.components.RedButtonCTA
+import com.sisl.gpsvideorecorder.presentation.viewmodels.LoginScreenViewModel
+import com.sisl.gpsvideorecorder.presentation.viewmodels.VideoHistoryScreenViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.ic_next
 import gpsvideorecorder.composeapp.generated.resources.ic_login_bg
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {}
+    videoModel: LoginScreenViewModel = koinInject(),
+    onSuccessLogin: () -> Unit
 ) {
     val userName = remember { mutableStateOf("") }
     val userPassword = remember { mutableStateOf("") }
     val userRememberChecked = remember { mutableStateOf(false) }
+
+    val uiState by videoModel.uiState.collectAsState()
+
+
+    LaunchedEffect(uiState.loginResponse) {
+        val response = uiState.loginResponse
+        if (response?.code == 200) {
+            onSuccessLogin()
+        }
+    }
+    if (uiState.isLoading) {
+        CircularProgressIndicator()
+    }
+
+    if (uiState.showErrorDialog && uiState.errorMessage != null) {
+        MessageDialog(
+            modifier = Modifier.height(220.dp),
+            isSuccessDialog = false,
+            message = uiState.errorMessage ?: "Something went wrong",
+            onDismiss = {
+                videoModel.dismissErrorDialog()
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -95,51 +133,64 @@ fun LoginScreen(
                 value = userPassword.value,
                 onValueChange = { userPassword.value = it },
                 hint = "User Password",
-                keyboardType = KeyboardType.Password,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp),
                 drawableTrailingIcon = Icons.Default.Lock,
-                visualTransformation = PasswordVisualTransformation()
+//                visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(5.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = userRememberChecked.value,
-                    onCheckedChange = { userRememberChecked.value = it },
-                    modifier = Modifier.padding(start = 6.dp),
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = PrimaryColor, uncheckedColor = CheckBoxBorderColor
-                    )
-                )
-                Text(
-                    text = "Remember Me",
-                    color = Color.Black,
-                    fontSize = 14.sp
-                )
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.Start,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Checkbox(
+//                    checked = userRememberChecked.value,
+//                    onCheckedChange = { userRememberChecked.value = it },
+//                    modifier = Modifier.padding(start = 6.dp),
+//                    colors = CheckboxDefaults.colors(
+//                        checkedColor = PrimaryColor, uncheckedColor = CheckBoxBorderColor
+//                    )
+//                )
+//                Text(
+//                    text = "Remember Me",
+//                    color = Color.Black,
+//                    fontSize = 14.sp
+//                )
+//            }
+            Spacer(modifier = Modifier.height(10.dp))
+            RedButtonCTA(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 30.dp)
+                    .height(48.dp),
+                onButtonClicked = {
+                    // Add basic validation
+                    if (userName.value.isNotBlank() && userPassword.value.isNotBlank()) {
+                        videoModel.onLoginClicked(userName.value, userPassword.value)
+                    }
+                },
+                buttonText = "Login",
+                drawableIcon = Res.drawable.ic_next
+            )
 
         }
-        RedButtonCTA(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 50.dp)
-                .height(48.dp)
                 .align(Alignment.BottomCenter),
-            onButtonClicked = {
-                // Add basic validation
-                if (userName.value.isNotBlank() && userPassword.value.isNotBlank()) {
-                    onLoginSuccess()
-                }
-            },
-            buttonText = "Login",
-            drawableIcon = Res.drawable.ic_next
-        )
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Version : ${getAppVersion()}",
+                fontFamily = MyAppTypography().bodyLarge.fontFamily
+            )
+        }
+
     }
 }
 

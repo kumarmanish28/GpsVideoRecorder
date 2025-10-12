@@ -5,3 +5,6 @@ interface Platform {
 }
 
 expect fun getPlatform(): Platform
+
+// commonMain
+expect fun getAppVersion(): String

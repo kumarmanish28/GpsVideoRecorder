@@ -1,10 +1,14 @@
 package com.sisl.gpsvideorecorder.data.remote.utils
 
+import com.sisl.gpsvideorecorder.data.remote.requests.LoginReqData
 import com.sisl.gpsvideorecorder.data.remote.requests.RequestLocationData
 import com.sisl.gpsvideorecorder.data.remote.requests.RequestVideoLocationData
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
+import com.sisl.gpsvideorecorder.data.remote.response.LoginApiResp
 import com.sisl.gpsvideorecorder.domain.models.LocationData
+import com.sisl.gpsvideorecorder.domain.models.LoginRequest
+import com.sisl.gpsvideorecorder.domain.models.LoginResponse
 import com.sisl.gpsvideorecorder.utils.Utils
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -24,6 +28,10 @@ interface ApiService {
         videoName: String,
         locationData: List<LocationData>
     ): Flow<ApiResponse<LocationsUploadResp>>
+
+    suspend fun userLogin(
+        loginRequest: LoginRequest
+    ): Flow<ApiResponse<LoginResponse>>
 }
 
 class ApiServiceImpl(private val httpClient: HttpClient) : ApiService {
@@ -69,6 +77,35 @@ class ApiServiceImpl(private val httpClient: HttpClient) : ApiService {
         } catch (e: Exception) {
             emit(ApiResponse.Error(e.message ?: "Unknown error"))
         }
+    }
+
+    override suspend fun userLogin(loginRequest: LoginRequest): Flow<ApiResponse<LoginResponse>> = flow{
+        try {
+            emit(ApiResponse.Loading)
+            val request = LoginReqData(
+                userId = loginRequest.userId,
+                password = loginRequest.password
+            )
+            val response = httpClient.post("${Utils.BASE_URL}/location/login") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            if (response.status.isSuccess()) {
+                val response = LoginResponse(
+                    code = response.status.value ,
+                    message = "User Found",
+                    user =  response.body<LoginApiResp>().user ?: ""
+                )
+                emit(ApiResponse.Success(response))
+            } else {
+                emit(ApiResponse.Error("User Not Found", response.status.value))
+            }
+
+        }catch (e: Exception) {
+            emit(ApiResponse.Error( "User Not Found", 404))
+        }
+
     }
 
 }

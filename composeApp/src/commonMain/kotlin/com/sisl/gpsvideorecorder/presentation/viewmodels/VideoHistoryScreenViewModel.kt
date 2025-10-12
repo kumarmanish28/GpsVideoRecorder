@@ -104,20 +104,14 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
         viewModelScope.launch {
             repository.deleteLocation(videoId).collect { response ->
                 when (response) {
-                    is ApiResponse.Loading -> {
-//                        _uiState.update { currentState ->
-//                            currentState.copy(
-//                                isLoading = true
-//                            )
-//                        }
-                    }
+                    is ApiResponse.Loading -> {}
 
                     is ApiResponse.Success -> {
-//                        _uiState.update { currentState ->
-//                            currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-//                                if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
-//                            })
-//                        }
+                        _uiState.update { currentState ->
+                            currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
+                                if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
+                            })
+                        }
                         loadVideoHistoryData()
                     }
 

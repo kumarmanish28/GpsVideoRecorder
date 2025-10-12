@@ -79,7 +79,7 @@ fun MessageDialog(
                         textAlign = TextAlign.Center,
                         fontFamily = MyAppTypography().bodySmall.fontFamily
                     )
-                    Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier.align(Alignment.CenterHorizontally),
