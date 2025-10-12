@@ -14,9 +14,9 @@ fun initKoin() {
 
 // Helper object for Swift interop
 class KoinHelper {
-        @OptIn(ExperimentalObjCName::class)
-        @ObjCName("doInitKoin")
-        fun doInitKoin() {
-            initKoin()
-        }
+    @OptIn(ExperimentalObjCName::class)
+    @ObjCName("doInitKoin")
+    fun doInitKoin() {
+        initKoin()
+    }
 }

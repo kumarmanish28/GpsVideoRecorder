@@ -53,6 +53,8 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
             implementation(libs.ktor.client.okhttp)
+
+            implementation(libs.androidx.room.sqlite.wrapper)
         }
 
         commonMain.dependencies {
@@ -68,8 +70,10 @@ kotlin {
             implementation(libs.material3.window.size)
             implementation(libs.kotlinx.datetime)
             implementation(libs.jetbrains.compose.navigation)
+
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
+
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.compottie)
@@ -92,16 +96,14 @@ kotlin {
     }
 }
 
+kotlin
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 
 room {
     schemaDirectory("$projectDir/schemas")
-}
-
-dependencies {
-    add("kspAndroid", libs.androidx.room.compiler)
-    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
-    add("kspIosArm64", libs.androidx.room.compiler)
 }
 
 android {
@@ -150,5 +152,10 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.animation.android)
     debugImplementation(compose.uiTooling)
+
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }
 

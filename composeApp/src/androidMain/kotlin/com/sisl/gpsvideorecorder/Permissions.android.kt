@@ -12,6 +12,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@Suppress("-Xexpect-actual-classes")
 actual class MultiPermissionController  actual constructor(private val context: Any?) {
     private val activity
         get() = context as? Activity ?: throw IllegalStateException("Context must be an Activity")
