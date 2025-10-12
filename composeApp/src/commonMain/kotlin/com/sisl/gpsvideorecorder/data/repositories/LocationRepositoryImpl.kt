@@ -11,6 +11,7 @@ import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.state.VideoItem
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -83,8 +84,14 @@ class LocationRepositoryImpl(private val dao: LocationDao, private val apiServic
         videoName = if (videoName.isNullOrEmpty()) "video_$currentDateTime.mp4" else videoName
         return apiService.uploadCoordinate(videoName, locationDataList)
     }
-//
-//    override suspend fun deleteLocation(videoId: Long): Result<Unit> {
-////        TODO("Not yet implemented")
-//    }
+
+    override suspend fun deleteLocation(videoId: Long): Flow<ApiResponse<Boolean>> = flow {
+        try {
+            emit(ApiResponse.Loading)
+            dao.deleteDataBasedOnVideoId(videoId)
+            emit(ApiResponse.Success(true))
+        } catch (ex: Exception) {
+            emit(ApiResponse.Error(ex.message ?: "No data found", 409))
+        }
+    }
 }

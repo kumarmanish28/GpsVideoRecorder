@@ -187,7 +187,7 @@ fun VideoRecordingScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(PrimaryColor),
-                            btnName = "${currentLocation?.latitude}",
+                            btnName = "${currentLocation?.latitude?:"-"}",
                             icon = Res.drawable.current_location
                         ) {
 
@@ -262,7 +262,7 @@ fun CustomButton(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = btnName,
+                text = btnName?:"-",
                 color = Color.Green,
                 fontFamily = MyAppTypography().labelMedium.fontFamily
             )

@@ -102,17 +102,33 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
 
     fun onDeleteClicked(videoId: Long) {
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-                    if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
-                })
-            }
+            repository.deleteLocation(videoId).collect { response ->
+                when (response) {
+                    is ApiResponse.Loading -> {
+//                        _uiState.update { currentState ->
+//                            currentState.copy(
+//                                isLoading = true
+//                            )
+//                        }
+                    }
 
-            delay(1500)
-            _uiState.update { currentState ->
-                currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-                    if (videoItem.videoId == videoId) videoItem.copy(isDeleted = false) else videoItem
-                }, errorMessage = null)
+                    is ApiResponse.Success -> {
+//                        _uiState.update { currentState ->
+//                            currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
+//                                if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
+//                            })
+//                        }
+                        loadVideoHistoryData()
+                    }
+
+                    is ApiResponse.Error -> {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                errorMessage = response.message ?: "An unexpected error occurred"
+                            )
+                        }
+                    }
+                }
             }
         }
     }

@@ -34,7 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sisl.gpsvideorecorder.SplashScreenColor
 import gpsvideorecorder.composeapp.generated.resources.Res
+import gpsvideorecorder.composeapp.generated.resources.app_logo
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
+import gpsvideorecorder.composeapp.generated.resources.splash
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 
@@ -93,7 +95,7 @@ fun SplashScreen(
         ) {
             // App Logo
             Image(
-                painter = painterResource(Res.drawable.compose_multiplatform),
+                painter = painterResource(Res.drawable.splash),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(150.dp)

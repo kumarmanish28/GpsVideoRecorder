@@ -63,8 +63,8 @@ fun VideoHistoryScreen(
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize().padding(
-                    vertical = if (platFormName.name == "iOS") 24.dp else 48.dp, horizontal = 10.dp
-                ), verticalArrangement = Arrangement.SpaceBetween
+                vertical = if (platFormName.name == "iOS") 24.dp else 48.dp, horizontal = 10.dp
+            ), verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(modifier.fillMaxWidth()) {
                 IconButton(
@@ -173,7 +173,10 @@ fun VideoHistoryScreen(
                     itemsIndexed(uiState.videoItemsList) { index, item ->
                         VideoHistoryItemRow(item = item, onUploadClicked = {
                             videoModel.onUploadClicked(item.videoId)
-                        }, onDeleteClicked = { videoModel.onDeleteClicked(item.videoId) })
+                        }, onDeleteClicked = {
+                            videoModel.onDeleteClicked(item.videoId)
+                        }
+                        )
                         if (index < uiState.videoItemsList.lastIndex) {
                             Spacer(
                                 modifier = Modifier.fillMaxWidth().height(0.2.dp)
@@ -230,18 +233,18 @@ fun VideoHistoryItemRow(
         }
 
         Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-            if (item.isDeleted) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
-                )
-            } else {
+//            if (item.isDeleted) {
+////                CircularProgressIndicator(
+////                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
+////                )
+//            } else {
                 Image(
                     painter = painterResource(Res.drawable.ic_delete), // Replace with your delete icon
                     contentDescription = "Delete Data for V${item.videoId}",
                     modifier = Modifier.size(20.dp).clickable(onClick = onDeleteClicked),
                     colorFilter = ColorFilter.tint(Color.Red)
                 )
-            }
+//            }
         }
     }
 }

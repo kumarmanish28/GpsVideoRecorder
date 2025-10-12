@@ -23,5 +23,5 @@ interface LocationRepository {
 
     // Networking Operation
     suspend fun uploadLocation(videoId: Long?): Flow<ApiResponse<LocationsUploadResp>>
-//    suspend fun deleteLocation(videoId: Long): Result<Unit>
+    suspend fun deleteLocation(videoId: Long): Flow<ApiResponse<Boolean>>
 }

@@ -65,7 +65,11 @@ fun App() {
                     ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
                 }) {
                 SplashScreen {
-                    navController.navigate(Routes.LOGIN)
+                    navController.navigate(Routes.LOGIN){
+                        popUpTo(Routes.SPLASH) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
             composable(
@@ -99,7 +103,7 @@ fun App() {
                 }) {
                 LoginScreen {
                     navController.navigate(Routes.VIDEO_RECORDING) {
-                        popUpTo(Routes.SPLASH) {
+                        popUpTo(Routes.LOGIN) {
                             inclusive = true
                         }
                     }
