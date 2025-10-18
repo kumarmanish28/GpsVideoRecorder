@@ -78,7 +78,7 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
         try {
             videoFileName = "android_video_${System.currentTimeMillis()}.mp4"
             val videoFile = File(
-                context.getExternalFilesDir(Environment.DIRECTORY_MOVIES),
+                context.getExternalFilesDir(Environment.DIRECTORY_DCIM),
                 videoFileName!!
             )
             val outputOptions = FileOutputOptions.Builder(videoFile).build()
