@@ -30,7 +30,7 @@ actual class MultiPermissionController  actual constructor(private val context: 
             Manifest.permission.ACCESS_COARSE_LOCATION
         ),
         Permission.CAMERA to listOf(Manifest.permission.CAMERA),
-        Permission.AUDIO to listOf(Manifest.permission.RECORD_AUDIO),
+//        Permission.AUDIO to listOf(Manifest.permission.RECORD_AUDIO),
         Permission.STORAGE to if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
             listOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,

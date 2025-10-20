@@ -39,7 +39,10 @@ import platform.UIKit.UIDeviceOrientationDidChangeNotification
 import platform.UIKit.UIView
 import platform.darwin.NSObject
 
-actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo) -> Unit) {
+actual class VideoRecorder actual constructor(
+    val onVideoRecorded: (VideoRecInfo) -> Unit,
+    val onSavingProgress: ((Float) -> Unit)?
+) {
     private val captureSession = AVCaptureSession().apply {
         usesApplicationAudioSession = true
     }
@@ -202,8 +205,15 @@ actual class VideoRecorder actual constructor(val onVideoRecorded: (VideoRecInfo
 }
 
 @Composable
-actual fun rememberVideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit): VideoRecorder {
-//    return remember { VideoRecorder().also { it.initialize() } }
-    return remember { VideoRecorder(onVideoRecorded) }
+actual fun rememberVideoRecorder(
+    onVideoRecorded: (VideoRecInfo) -> Unit,
+    onSavingProgress: ((Float) -> Unit)?
+): VideoRecorder {
+    return remember {
+        VideoRecorder(
+            onVideoRecorded = onVideoRecorded,
+            onSavingProgress = onSavingProgress
+        )
+    }
 }
 

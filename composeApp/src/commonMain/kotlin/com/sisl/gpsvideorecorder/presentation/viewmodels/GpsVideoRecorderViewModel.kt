@@ -14,6 +14,7 @@ import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecInfo
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -23,6 +24,11 @@ class GpsVideoRecorderViewModel(
     private val locationRepository: LocationRepository,
 ) : ViewModel() {
 
+    private val _videoSavingProgress = MutableStateFlow(0f)
+    val videoSavingProgress: StateFlow<Float> = _videoSavingProgress
+
+    private val _isVideoSaving = MutableStateFlow(false)
+    val isVideoSaving: StateFlow<Boolean> = _isVideoSaving
     private val _videoRecordingState = mutableStateOf(RecordingState.STOPPED)
     val videoRecordingState: State<RecordingState> = _videoRecordingState
 
@@ -74,13 +80,32 @@ class GpsVideoRecorderViewModel(
         }
     }
 
+    //    fun stopGpsVideoRecording(videoRecorder: VideoRecorder) {
+//        _videoRecordingState.value = RecordingState.STOPPED
+//        videoRecorder.stopRecording()
+//        locationRepository.stopLocationTracking()
+//    }
     fun stopGpsVideoRecording(videoRecorder: VideoRecorder) {
         _videoRecordingState.value = RecordingState.STOPPED
+        _isVideoSaving.value = true
+        _videoSavingProgress.value = 0f
         videoRecorder.stopRecording()
         locationRepository.stopLocationTracking()
-
-
     }
+
+    fun updateVideoSavingProgress(progress: Float) {
+        _videoSavingProgress.value = progress
+
+        // Auto-hide when progress reaches 100%
+        if (progress >= 100f) {
+            viewModelScope.launch {
+                delay(1000) // Show 100% for 1 second
+                _isVideoSaving.value = false
+                _videoSavingProgress.value = 0f
+            }
+        }
+    }
+
 
     fun getAllRecordedCoordinates() {
         viewModelScope.launch {
@@ -124,6 +149,7 @@ class GpsVideoRecorderViewModel(
 
         locationCollectionJob?.cancel()
         currentVideoId = null
+        print("Video Location: ${result.videoLocation}")
     }
 
     fun onUploadClicked() {

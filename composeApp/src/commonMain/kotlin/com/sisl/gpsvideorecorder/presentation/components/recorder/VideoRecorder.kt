@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 // In commonMain
-expect class VideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit) {
+expect class VideoRecorder(
+    onVideoRecorded: (VideoRecInfo) -> Unit,
+    onSavingProgress: ((Float) -> Unit)? = null
+) {
     fun initialize(onReady: () -> Unit = {})
     fun startRecording()
     fun stopRecording()
@@ -20,7 +23,11 @@ enum class RecordingState {
 data class VideoRecInfo(
     var videoUri: String? = "",
     var videoName: String? = "",
+    var videoLocation: String? = ""
 )
 
 @Composable
-expect fun rememberVideoRecorder(onVideoRecorded: (VideoRecInfo) -> Unit): VideoRecorder
+expect fun rememberVideoRecorder(
+    onVideoRecorded: (VideoRecInfo) -> Unit,
+    onSavingProgress: ((Float) -> Unit)? = null
+): VideoRecorder

@@ -23,9 +23,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -72,10 +76,15 @@ fun VideoRecordingScreen(
     viewModel: GpsVideoRecorderViewModel = koinInject(),
     onNext: (String) -> Unit
 ) {
+
     val recorder = rememberVideoRecorder(onVideoRecorded = { result ->
         viewModel.onRecordingComplete(result)
+    }, onSavingProgress = { progress ->
+        viewModel.updateVideoSavingProgress(progress)
     })
     val currentLocation by viewModel.latestLocation.collectAsStateWithLifecycle()
+    val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
+    val isVideoSaving by viewModel.isVideoSaving.collectAsState()
     /*   val composition by rememberLottieComposition {
          LottieCompositionSpec.JsonString(
              Res.readBytes("files/video_recorder_anim.json").decodeToString()
@@ -104,7 +113,6 @@ fun VideoRecordingScreen(
     }
 
 
-
     val uploadingState = remember { viewModel.uploadAllPendingCoordinates }
 
 
@@ -120,6 +128,37 @@ fun VideoRecordingScreen(
                         .fillMaxSize()
                         .background(Color.Black)
                 )
+
+                // Video Saving Progress Overlay
+                if (isVideoSaving) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.7f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(48.dp),
+                                color = Color.White,
+                                strokeWidth = 3.dp
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = "Saving Video... ${videoSavingProgress.toInt()}%",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+
 
                 when (uploadingState.value) {
                     UploadingState.LOADING -> {
@@ -214,10 +253,9 @@ fun VideoRecordingScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(PrimaryColor),
-                            btnName = "${currentLocation?.latitude?:"-"}",
+                            btnName = "${currentLocation?.latitude ?: "-"}",
                             icon = Res.drawable.current_location
                         ) {
-
                         }
 
                     }
@@ -289,11 +327,12 @@ fun CustomButton(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = btnName?:"-",
+                text = btnName ?: "-",
                 color = Color.Green,
                 fontFamily = MyAppTypography().labelMedium.fontFamily
             )
         }
     }
 }
+
 
