@@ -1,6 +1,7 @@
 package com.sisl.gpsvideorecorder.presentation.components.recorder
 
 import android.Manifest
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
@@ -39,7 +40,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -350,16 +355,18 @@ actual class VideoRecorder actual constructor(
     }
 
     private fun saveVideoToGalleryWithProgress(videoUri: Uri) {
-        // Start progress at 0%
         onSavingProgress?.invoke(0f)
 
-        // Use a coroutine to handle the file copy with progress
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val resolver = context.contentResolver
-
-                // Get the source file size for progress calculation
                 val sourceFile = File(videoUri.path ?: "")
+
+                if (!sourceFile.exists()) {
+                    onSavingProgress?.invoke(0f)
+                    return@launch
+                }
+
                 val totalSize = sourceFile.length()
 
                 val contentValues = ContentValues().apply {
@@ -368,61 +375,77 @@ actual class VideoRecorder actual constructor(
                     put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
                 }
 
-                resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
-                    ?.let { galleryUri ->
-                        resolver.openOutputStream(galleryUri)?.use { outputStream ->
-                            resolver.openInputStream(videoUri)?.use { inputStream ->
-                                // Copy with progress tracking
-                                copyStreamWithProgress(inputStream, outputStream, totalSize)
-                            }
-                        }
+                resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)?.let { galleryUri ->
+                    // Use the optimized stream copy directly
+                    val success = copyWithStreams(videoUri, galleryUri, totalSize, resolver)
 
-                        // Complete progress
+                    if (success) {
                         onSavingProgress?.invoke(100f)
-
-                        // Notify completion
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, "Video saved to gallery", Toast.LENGTH_SHORT).show()
-
-                            val videoRecodedInfo = VideoRecInfo(
+                            val videoRecordedInfo = VideoRecInfo(
                                 videoUri = galleryUri.toString(),
                                 videoName = videoFileName!!,
                                 videoLocation = getVideoLocation(galleryUri)
                             )
-                            onVideoRecorded(videoRecodedInfo)
+                            onVideoRecorded(videoRecordedInfo)
                         }
-                    } ?: run {
-                    Log.e("CameraRecorder", "Failed to save video")
-                    onSavingProgress?.invoke(0f) // Reset progress on failure
+                    } else {
+                        onSavingProgress?.invoke(0f)
+                    }
+                } ?: run {
+                    onSavingProgress?.invoke(0f)
                 }
 
             } catch (e: Exception) {
-                Log.e("VideoRecorder", "Save to gallery failed", e)
-                onSavingProgress?.invoke(0f) // Reset progress on failure
+                onSavingProgress?.invoke(0f)
             }
         }
     }
 
-    private suspend fun copyStreamWithProgress(
+    private suspend fun copyWithStreams(
+        sourceUri: Uri,
+        destinationUri: Uri,
+        totalSize: Long,
+        resolver: ContentResolver
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                resolver.openInputStream(sourceUri)?.use { inputStream ->
+                    resolver.openOutputStream(destinationUri)?.use { outputStream ->
+                        copyStreamWithProgressOptimized(inputStream, outputStream, totalSize)
+                        true
+                    } ?: false
+                } ?: false
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
+    private suspend fun copyStreamWithProgressOptimized(
         inputStream: InputStream,
         outputStream: OutputStream,
         totalSize: Long
     ) {
-        val buffer = ByteArray(8192)
+        val buffer = ByteArray(512 * 1024) // 512KB buffer
         var bytesCopied = 0L
         var bytesRead: Int
+        var lastProgress = 0f
 
         while (inputStream.read(buffer).also { bytesRead = it } != -1) {
             outputStream.write(buffer, 0, bytesRead)
             bytesCopied += bytesRead
 
-            // Calculate progress percentage
-            val progress = (bytesCopied.toFloat() / totalSize.toFloat()) * 100f
-            onSavingProgress?.invoke(progress.coerceIn(0f, 100f))
+            val currentProgress = (bytesCopied.toFloat() / totalSize.toFloat()) * 100f
 
-            // Small delay to make progress visible (optional)
-            delay(10)
+            if (currentProgress - lastProgress >= 5f || currentProgress >= 100f) {
+                onSavingProgress?.invoke(currentProgress.coerceIn(0f, 100f))
+                lastProgress = currentProgress
+            }
         }
+
+        onSavingProgress?.invoke(100f)
     }
 
     private fun getVideoLocation(uri: Uri): String {
