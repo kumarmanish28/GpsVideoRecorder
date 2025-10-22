@@ -105,7 +105,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 25.dp)
                 )
                 Text(
-                    text = "sing in to access your account!",
+                    text = "sign in to access your account!",
                     fontSize = 15.sp,
                     color = Color.Black,
                     modifier = Modifier.padding(top = 70.dp)
