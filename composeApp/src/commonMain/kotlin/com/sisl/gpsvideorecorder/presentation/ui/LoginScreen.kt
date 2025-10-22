@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -21,7 +20,6 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,19 +30,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sisl.gpsvideorecorder.CheckBoxBorderColor
 import com.sisl.gpsvideorecorder.MyAppTypography
 import com.sisl.gpsvideorecorder.PrimaryColor
-import com.sisl.gpsvideorecorder.data.UploadingState
 import com.sisl.gpsvideorecorder.getAppVersion
 import com.sisl.gpsvideorecorder.presentation.components.EditTextField
 import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.components.RedButtonCTA
 import com.sisl.gpsvideorecorder.presentation.viewmodels.LoginScreenViewModel
-import com.sisl.gpsvideorecorder.presentation.viewmodels.VideoHistoryScreenViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.ic_next
 import gpsvideorecorder.composeapp.generated.resources.ic_login_bg
@@ -141,7 +136,7 @@ fun LoginScreen(
                 drawableTrailingIcon = Icons.Default.Lock,
 //                visualTransformation = PasswordVisualTransformation()
             )
-            Spacer(modifier = Modifier.height(5.dp))
+//            Spacer(modifier = Modifier.height(5.dp))
 //            Row(
 //                modifier = Modifier.fillMaxWidth(),
 //                horizontalArrangement = Arrangement.Start,
@@ -170,7 +165,7 @@ fun LoginScreen(
                 onButtonClicked = {
                     // Add basic validation
                     if (userName.value.isNotBlank() && userPassword.value.isNotBlank()) {
-                        videoModel.onLoginClicked(userName.value, userPassword.value)
+                        videoModel.onLoginClicked(userName.value, userPassword.value, userRememberChecked.value)
                     }
                 },
                 buttonText = "Login",

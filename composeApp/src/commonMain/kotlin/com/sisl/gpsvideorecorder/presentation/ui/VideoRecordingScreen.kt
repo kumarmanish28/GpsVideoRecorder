@@ -8,6 +8,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -57,12 +63,14 @@ import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
 import gpsvideorecorder.composeapp.generated.resources.current_location
 import gpsvideorecorder.composeapp.generated.resources.history
+import gpsvideorecorder.composeapp.generated.resources.ic_next
 import gpsvideorecorder.composeapp.generated.resources.upload
 import gpsvideorecorder.composeapp.generated.resources.video_recording
 import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -85,6 +93,9 @@ fun VideoRecordingScreen(
     val currentLocation by viewModel.latestLocation.collectAsStateWithLifecycle()
     val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
     val isVideoSaving by viewModel.isVideoSaving.collectAsState()
+    val recordingDuration by viewModel.recordingDuration.collectAsState()
+    val formattedDuration = viewModel.getFormattedDuration()
+
     /*   val composition by rememberLottieComposition {
          LottieCompositionSpec.JsonString(
              Res.readBytes("files/video_recorder_anim.json").decodeToString()
@@ -121,8 +132,9 @@ fun VideoRecordingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(2.4f)
-            ) {
+                    .weight(2.5f)
+            )
+            {
                 recorder.CameraPreview(
                     modifier = Modifier
                         .fillMaxSize()
@@ -191,104 +203,271 @@ fun VideoRecordingScreen(
                 }
             }
 
+//            Box(
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .fillMaxWidth()
+//            ) {
+//                // Bottom Cards Container
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .background(Color.White)
+//                        .padding(start = 16.dp, end = 16.dp, bottom = 40.dp, top = 10.dp)
+//                    ,
+//                    verticalArrangement = Arrangement.Center
+//                ) {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .weight(1f)
+//                            .padding(bottom = 5.dp),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        val fadeDuration = 500 // 1 second for each fade in/out
+//                        val minAlpha = 0.25f
+//                        val maxAlpha = 1f
+//                        val infiniteTransition = rememberInfiniteTransition()
+//                        val alpha: Float =
+//                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
+//                                infiniteTransition.animateFloat(
+//                                    initialValue = minAlpha,
+//                                    targetValue = maxAlpha,
+//                                    animationSpec = infiniteRepeatable(
+//                                        animation = tween(fadeDuration),
+//                                        repeatMode = RepeatMode.Reverse
+//                                    )
+//                                ).value
+//                            } else {
+//                                1f
+//                            }
+//
+//
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(if (viewModel.videoRecordingState.value == RecordingState.RECORDING) Color.Gray else PrimaryColor),
+//                            btnName = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) "Stop Recording" else "Start Recording",
+//                            icon = Res.drawable.video_recording,
+//                            alpha = alpha
+//                        ) {
+//                            when (viewModel.videoRecordingState.value) {
+//                                RecordingState.STOPPED -> {
+//                                    viewModel.startGspVideoRecording(recorder)
+//                                }
+//
+//                                RecordingState.RECORDING -> {
+//                                    viewModel.stopGpsVideoRecording(recorder)
+//                                }
+//                            }
+//                        }
+//                        Spacer(modifier = Modifier.width(10.dp))
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(PrimaryColor),
+//                            btnName = "${currentLocation?.latitude ?: "-"}",
+//                            icon = Res.drawable.current_location
+//                        ) {
+//                        }
+//
+//                    }
+//                    Spacer(modifier = Modifier.height(5.dp))
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .weight(1f)
+//                            .padding(bottom = 5.dp),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(PrimaryColor),
+//                            btnName = "Upload",
+//                            icon = Res.drawable.upload,
+//                        ) {
+//                            viewModel.onUploadClicked()
+//                        }
+//                        Spacer(modifier = Modifier.width(10.dp))
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(PrimaryColor),
+//                            btnName = "History",
+//                            icon = Res.drawable.history
+//                        ) {
+//                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
+//                                viewModel.stopGpsVideoRecording(recorder)
+//                            }
+//                            onNext.invoke(Routes.VIDEO_HISTORY)
+//                        }
+//                    }
+//                    Spacer(modifier = Modifier.height(5.dp))
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .weight(1f)
+//                            .padding(bottom = 5.dp),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(PrimaryColor),
+//                            btnName = "Update APK",
+//                            icon = Res.drawable.upload,
+//                        ) {
+//                            viewModel.onUpdateApkClicked()
+//                        }
+//                        Spacer(modifier = Modifier.width(10.dp))
+//                        CustomButton(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(PrimaryColor),
+//                            btnName = "Logout",
+//                            icon = Res.drawable.history
+//                        ) {
+//                            viewModel.onLogoutClicked{
+//                                onNext.invoke(Routes.LOGIN)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 40.dp, top = 10.dp)
             ) {
-                // Bottom Cards Container
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(start = 16.dp, end = 16.dp, bottom = 40.dp, top = 10.dp),
-                    verticalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(bottom = 5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        val fadeDuration = 500 // 1 second for each fade in/out
-                        val minAlpha = 0.25f
-                        val maxAlpha = 1f
-                        val infiniteTransition = rememberInfiniteTransition()
-                        val alpha: Float =
-                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
-                                infiniteTransition.animateFloat(
-                                    initialValue = minAlpha,
-                                    targetValue = maxAlpha,
-                                    animationSpec = infiniteRepeatable(
-                                        animation = tween(fadeDuration),
-                                        repeatMode = RepeatMode.Reverse
-                                    )
-                                ).value
-                            } else {
-                                1f
-                            }
-
-
-                        CustomButton(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(if (viewModel.videoRecordingState.value == RecordingState.RECORDING) Color.Gray else PrimaryColor),
-                            btnName = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) "Stop Recording" else "Start Recording",
-                            icon = Res.drawable.video_recording,
-                            alpha = alpha
+                    // Row 2: Start/Stop Recording + Location
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().height(70.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            when (viewModel.videoRecordingState.value) {
-                                RecordingState.STOPPED -> {
-                                    viewModel.startGspVideoRecording(recorder)
+                            val fadeDuration = 500
+                            val minAlpha = 0.25f
+                            val maxAlpha = 1f
+                            val infiniteTransition = rememberInfiniteTransition()
+                            val alpha: Float =
+                                if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
+                                    infiniteTransition.animateFloat(
+                                        initialValue = minAlpha,
+                                        targetValue = maxAlpha,
+                                        animationSpec = infiniteRepeatable(
+                                            animation = tween(fadeDuration),
+                                            repeatMode = RepeatMode.Reverse
+                                        )
+                                    ).value
+                                } else {
+                                    1f
                                 }
 
-                                RecordingState.RECORDING -> {
+                            CustomButton2(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(if (viewModel.videoRecordingState.value == RecordingState.RECORDING) Color.Gray else PrimaryColor),
+                                btnName = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) "Stop Recording" else "Start Recording",
+                                icon = Res.drawable.video_recording,
+                                alpha = alpha,
+                                msg =  if (viewModel.videoRecordingState.value == RecordingState.RECORDING) formattedDuration else "",
+                            ) {
+                                when (viewModel.videoRecordingState.value) {
+                                    RecordingState.STOPPED -> viewModel.startGspVideoRecording(
+                                        recorder
+                                    )
+
+                                    RecordingState.RECORDING -> viewModel.stopGpsVideoRecording(
+                                        recorder
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(PrimaryColor),
+                                btnName = "${currentLocation?.latitude ?: "-"}",
+                                icon = Res.drawable.current_location
+                            ) {
+                                // Location action
+                            }
+                        }
+                    }
+
+                    // Row 2: Upload + History
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 10.dp).height(70.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            CustomButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(PrimaryColor),
+                                btnName = "Upload",
+                                icon = Res.drawable.upload,
+                            ) {
+                                viewModel.onUploadClicked()
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(PrimaryColor),
+                                btnName = "History",
+                                icon = Res.drawable.history
+                            ) {
+                                if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
                                     viewModel.stopGpsVideoRecording(recorder)
                                 }
+                                onNext.invoke(Routes.VIDEO_HISTORY)
                             }
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        CustomButton(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(PrimaryColor),
-                            btnName = "${currentLocation?.latitude ?: "-"}",
-                            icon = Res.drawable.current_location
-                        ) {
-                        }
-
                     }
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(bottom = 5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        CustomButton(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(PrimaryColor),
-                            btnName = "Upload",
-                            icon = Res.drawable.upload,
+
+                    // Row 3: Update APK + Logout
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 10.dp).height(70.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            viewModel.onUploadClicked()
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        CustomButton(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(PrimaryColor),
-                            btnName = "History",
-                            icon = Res.drawable.history
-                        ) {
-                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
-                                viewModel.stopGpsVideoRecording(recorder)
+                            CustomButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(PrimaryColor),
+                                btnName = "Update APK",
+                                isBtnEnable = false,
+                                alpha = 0.5f,
+                                icon = Res.drawable.ic_next, // Use appropriate icon
+                            ) {
+                                viewModel.onUpdateApkClicked()
                             }
-                            onNext.invoke(Routes.VIDEO_HISTORY)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(PrimaryColor),
+                                btnName = "Logout",
+                                icon = Res.drawable.ic_next // Use appropriate icon
+                            ) {
+                                viewModel.onLogoutClicked {
+                                    onNext.invoke(Routes.LOGIN)
+                                }
+                            }
                         }
+                    }
+
+                    // Add extra space at the bottom
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
             }
@@ -299,10 +478,11 @@ fun VideoRecordingScreen(
 @Composable
 fun CustomButton(
     modifier: Modifier,
+    isBtnEnable: Boolean = true,
     btnName: String,
     icon: DrawableResource,
     alpha: Float = 1f,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     /*   val platFormName = remember { getPlatform().name }
            .height(if (platFormName == "iOS") 160.dp else 120.dp),*/
@@ -312,7 +492,7 @@ fun CustomButton(
     ) {
         Column(
             modifier = modifier
-                .fillMaxSize().clickable {
+                .fillMaxSize().clickable(enabled = isBtnEnable) {
                     onClick.invoke()
                 },
             verticalArrangement = Arrangement.Center,
@@ -334,5 +514,61 @@ fun CustomButton(
         }
     }
 }
+
+@Composable
+fun CustomButton2(
+    modifier: Modifier,
+    isBtnEnable: Boolean = true,
+    msg: String = "",
+    btnName: String,
+    icon: DrawableResource,
+    alpha: Float = 1f,
+    onClick: () -> Unit,
+) {
+    /*   val platFormName = remember { getPlatform().name }
+           .height(if (platFormName == "iOS") 160.dp else 120.dp),*/
+    Card(
+        modifier = modifier.background(Color.White),
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize().clickable(enabled = isBtnEnable) {
+                    onClick.invoke()
+                },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                        .graphicsLayer { this.alpha = alpha },
+                    tint = Color.White
+                )
+                if (msg.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = msg,
+                        color = Color.White,
+                        fontFamily = MyAppTypography().labelMedium.fontFamily
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = btnName ?: "-",
+                color = Color.White,
+                fontFamily = MyAppTypography().labelMedium.fontFamily
+            )
+        }
+    }
+}
+
 
 

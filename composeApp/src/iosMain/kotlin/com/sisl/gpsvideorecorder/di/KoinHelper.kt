@@ -7,7 +7,8 @@ fun initKoin() {
     startKoin {
         modules(
             locationModule,  // Your common/shared module
-            iosModule      // iOS-specific module
+            iosModule,     // iOS-specific module,
+            dataStoreModule
         )
     }
 }

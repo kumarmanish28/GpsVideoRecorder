@@ -1,5 +1,6 @@
 package com.sisl.gpsvideorecorder.di
 
+import com.sisl.gpsvideorecorder.data.PrefDataStoreManager
 import com.sisl.gpsvideorecorder.data.local.dao.LocationDao
 import com.sisl.gpsvideorecorder.data.local.database.GpsRecorderDb
 import com.sisl.gpsvideorecorder.data.remote.utils.ApiService
@@ -19,7 +20,10 @@ val locationModule = module {
     single<LocationDao> { get<GpsRecorderDb>().locationDao() }
     single { ApiServiceImpl(get()) }.bind(ApiService::class)
     single<LocationRepository> { LocationRepositoryImpl(get(), get()) }
-    viewModel { GpsVideoRecorderViewModel(get()) }
+    single {
+        PrefDataStoreManager(get())
+    }
+    viewModel { GpsVideoRecorderViewModel(get(),get()) }
     viewModel { VideoHistoryScreenViewModel(get()) }
-    viewModel { LoginScreenViewModel(get()) }
+    viewModel { LoginScreenViewModel(get(), get()) }
 }

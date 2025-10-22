@@ -20,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,19 +33,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sisl.gpsvideorecorder.Routes
 import com.sisl.gpsvideorecorder.SplashScreenColor
+import com.sisl.gpsvideorecorder.presentation.viewmodels.LoginScreenViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.app_logo
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
 import gpsvideorecorder.composeapp.generated.resources.splash
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 @Composable
 fun SplashScreen(
-    onSplashFinished: () -> Unit
+    viewModel: LoginScreenViewModel = koinInject(),
+    onNavigate: (String) -> Unit
 ) {
     var startAnimation by remember { mutableStateOf(false) }
+    val isUserLoggedIn by viewModel.isUserLoggedIn.collectAsState()
+
+    LaunchedEffect(isUserLoggedIn) {
+        when (isUserLoggedIn) {
+            true -> {
+                startAnimation = true
+                delay(1500)
+                onNavigate(Routes.VIDEO_RECORDING)
+            }
+            false -> {
+                startAnimation = true
+                delay(2000)
+                onNavigate(Routes.LOGIN)
+            }
+            null -> {
+                // Still loading, do nothing
+            }
+        }
+    }
 
     // Animation states
     val alphaAnim = animateFloatAsState(
@@ -74,11 +98,11 @@ fun SplashScreen(
     )
 
     // Launch animation
-    LaunchedEffect(key1 = true) {
-        startAnimation = true
-        delay(2000)
-        onSplashFinished()
-    }
+//    LaunchedEffect(key1 = true) {
+//        startAnimation = true
+//        delay(2000)
+//        onSplashFinished()
+//    }
 
     Box(
         modifier = Modifier

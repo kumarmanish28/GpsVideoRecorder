@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sisl.gpsvideorecorder.data.PrefDataStoreManager
 import com.sisl.gpsvideorecorder.data.UploadingState
 import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
@@ -18,10 +19,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 class GpsVideoRecorderViewModel(
     private val locationRepository: LocationRepository,
+    private val prefManager: PrefDataStoreManager,
 ) : ViewModel() {
 
     private val _videoSavingProgress = MutableStateFlow(0f)
@@ -46,6 +50,10 @@ class GpsVideoRecorderViewModel(
     private var currentVideoId: Long? = null // To store the ID of the ongoing recording
     private var locationCollectionJob: Job? = null
 
+    private var recordingStartTime: Long = 0L
+    private var durationTimer: Job? = null
+    private val _recordingDuration = MutableStateFlow(0L)
+    val recordingDuration: StateFlow<Long> = _recordingDuration
 
     init {
         viewModelScope.launch {
@@ -70,7 +78,7 @@ class GpsVideoRecorderViewModel(
                         }
                     }
                 }
-
+                startDurationTimer()
             } catch (e: Exception) {
                 // Handle error starting recording (e.g., database error)
                 _videoRecordingState.value = RecordingState.STOPPED
@@ -91,6 +99,46 @@ class GpsVideoRecorderViewModel(
         _videoSavingProgress.value = 0f
         videoRecorder.stopRecording()
         locationRepository.stopLocationTracking()
+        stopDurationTimer()
+        resetDuration()
+    }
+
+    private fun startDurationTimer() {
+        // Using kotlin.time.Clock.System for multiplatform compatibility
+        recordingStartTime = Clock.System.now().toEpochMilliseconds()
+        durationTimer = viewModelScope.launch {
+            // isActive ensures the coroutine stops when cancelled
+            while (isActive && _videoRecordingState.value == RecordingState.RECORDING) {
+                val currentTime = Clock.System.now().toEpochMilliseconds()
+                _recordingDuration.value = currentTime - recordingStartTime
+                delay(100) // Update every 100ms
+            }
+
+            // Cleanup when loop exits
+            println("Duration timer stopped. isActive: $isActive, recordingState: ${_videoRecordingState.value}")
+        }
+    }
+
+    private fun stopDurationTimer() {
+        // This cancels the coroutine, making isActive = false
+        durationTimer?.cancel()
+        durationTimer = null
+    }
+
+    private fun resetDuration() {
+        _recordingDuration.value = 0L
+    }
+
+    // Format duration to HH:MM:SS format using padStart
+    fun getFormattedDuration(): String {
+        val totalSeconds = _recordingDuration.value / 1000
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+
+        return "${hours.toString().padStart(2, '0')}:${
+            minutes.toString().padStart(2, '0')
+        }:${seconds.toString().padStart(2, '0')}"
     }
 
     fun updateVideoSavingProgress(progress: Float) {
@@ -173,6 +221,38 @@ class GpsVideoRecorderViewModel(
             } catch (ex: Exception) {
                 _uploadAllPendingCoordinates.value = UploadingState.FAILED
             }
+        }
+    }
+    fun onUpdateApkClicked() {
+        viewModelScope.launch {
+            try {
+//                locationRepository.uploadLocation(null).collect { response ->
+//                    when (response) {
+//                        is ApiResponse.Success -> {
+//                            _uploadAllPendingCoordinates.value = UploadingState.SUCCESS
+//                        }
+//
+//                        is ApiResponse.Error -> {
+//                            _uploadAllPendingCoordinates.value = UploadingState.FAILED
+//                        }
+//
+//                        is ApiResponse.Loading -> {
+//                            _uploadAllPendingCoordinates.value = UploadingState.LOADING
+//                        }
+//                    }
+//                }
+            } catch (ex: Exception) {
+                _uploadAllPendingCoordinates.value = UploadingState.FAILED
+            }
+        }
+    }
+    fun onLogoutClicked(onLogout:()->Unit) {
+        viewModelScope.launch {
+            prefManager.save("USER_ID", "")
+            prefManager.save("REMEMBER_ME", "false")
+            prefManager.clearAllData()
+            delay(1000)
+            onLogout.invoke()
         }
     }
 
