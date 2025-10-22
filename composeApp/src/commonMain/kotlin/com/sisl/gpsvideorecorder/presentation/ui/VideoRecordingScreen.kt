@@ -74,7 +74,7 @@ import org.koin.compose.koinInject
 @Composable
 fun VideoRecordingScreen(
     viewModel: GpsVideoRecorderViewModel = koinInject(),
-    onNext: (String) -> Unit
+    onNext: (String) -> Unit,
 ) {
 
     val recorder = rememberVideoRecorder(onVideoRecorded = { result ->
@@ -201,7 +201,7 @@ fun VideoRecordingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
-                        .padding(horizontal = 16.dp, vertical = 40.dp),
+                        .padding(start = 16.dp, end = 16.dp, bottom = 40.dp, top = 10.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Row(
@@ -328,7 +328,7 @@ fun CustomButton(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = btnName ?: "-",
-                color = Color.Green,
+                color = Color.White,
                 fontFamily = MyAppTypography().labelMedium.fontFamily
             )
         }

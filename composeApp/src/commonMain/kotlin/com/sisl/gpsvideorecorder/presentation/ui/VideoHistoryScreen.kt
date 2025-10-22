@@ -113,18 +113,18 @@ fun VideoHistoryScreen(
                 )
 
                 Text(
-                    text = "Upload",
+                    text = "Upload/Delete",
                     modifier = Modifier.padding(start = 32.dp),
                     fontSize = 12.sp,
                     fontFamily = MyAppTypography().labelMedium.fontFamily
                 )
 
-                Text(
-                    text = "Delete",
-                    modifier = Modifier.padding(start = 32.dp),
-                    fontSize = 12.sp,
-                    fontFamily = MyAppTypography().labelMedium.fontFamily
-                )
+//                Text(
+//                    text = "Delete",
+//                    modifier = Modifier.padding(start = 32.dp),
+//                    fontSize = 12.sp,
+//                    fontFamily = MyAppTypography().labelMedium.fontFamily
+//                )
             }
 
             Spacer(
@@ -162,7 +162,9 @@ fun VideoHistoryScreen(
                 if (uiState.successMessage != null) {
                     MessageDialog(
                         modifier = Modifier.height(220.dp).width(280.dp),
-                        isSuccessDialog = true, message = uiState.successMessage!!, onDismiss = {
+                        isSuccessDialog = true,
+                        message = uiState.successMessage!!,
+                        onDismiss = {
                             videoModel.clearSuccessMessage() // Clear dialog after dismiss
                         })
                 }
@@ -171,12 +173,13 @@ fun VideoHistoryScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 5.dp).weight(1f)
                 ) {
                     itemsIndexed(uiState.videoItemsList) { index, item ->
-                        VideoHistoryItemRow(item = item, onUploadClicked = {
+                        VideoHistoryItemRow(item = item, onUploadCoordinatesClicked = {
                             videoModel.onUploadClicked(item.videoId)
+                        }, onUploadVideoClicked = {
+//                            videoModel.onDeleteClicked(item.videoId)
                         }, onDeleteClicked = {
                             videoModel.onDeleteClicked(item.videoId)
-                        }
-                        )
+                        })
                         if (index < uiState.videoItemsList.lastIndex) {
                             Spacer(
                                 modifier = Modifier.fillMaxWidth().height(0.2.dp)
@@ -192,7 +195,10 @@ fun VideoHistoryScreen(
 
 @Composable
 fun VideoHistoryItemRow(
-    item: VideoItem, onUploadClicked: () -> Unit, onDeleteClicked: () -> Unit
+    item: VideoItem,
+    onUploadCoordinatesClicked: () -> Unit,
+    onUploadVideoClicked: () -> Unit,
+    onDeleteClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -227,7 +233,7 @@ fun VideoHistoryItemRow(
                 Image(
                     painter = painterResource(Res.drawable.ic_upload), // Replace with your upload icon
                     contentDescription = "Upload Data for V${item.videoId}",
-                    modifier = Modifier.size(20.dp).clickable(onClick = onUploadClicked)
+                    modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
                 )
             }
         }
