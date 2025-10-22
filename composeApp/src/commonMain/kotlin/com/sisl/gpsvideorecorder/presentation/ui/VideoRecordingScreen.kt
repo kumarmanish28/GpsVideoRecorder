@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -95,7 +96,6 @@ fun VideoRecordingScreen(
     val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
     val isVideoSaving by viewModel.isVideoSaving.collectAsState()
     val recordingDuration by viewModel.recordingDuration.collectAsState()
-//    val formattedDuration = viewModel.getFormattedDuration()
 
     val formattedDuration by remember(recordingDuration) {
         derivedStateOf {
@@ -216,139 +216,6 @@ fun VideoRecordingScreen(
                 }
             }
 
-//            Box(
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .fillMaxWidth()
-//            ) {
-//                // Bottom Cards Container
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .background(Color.White)
-//                        .padding(start = 16.dp, end = 16.dp, bottom = 40.dp, top = 10.dp)
-//                    ,
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(1f)
-//                            .padding(bottom = 5.dp),
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        val fadeDuration = 500 // 1 second for each fade in/out
-//                        val minAlpha = 0.25f
-//                        val maxAlpha = 1f
-//                        val infiniteTransition = rememberInfiniteTransition()
-//                        val alpha: Float =
-//                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
-//                                infiniteTransition.animateFloat(
-//                                    initialValue = minAlpha,
-//                                    targetValue = maxAlpha,
-//                                    animationSpec = infiniteRepeatable(
-//                                        animation = tween(fadeDuration),
-//                                        repeatMode = RepeatMode.Reverse
-//                                    )
-//                                ).value
-//                            } else {
-//                                1f
-//                            }
-//
-//
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(if (viewModel.videoRecordingState.value == RecordingState.RECORDING) Color.Gray else PrimaryColor),
-//                            btnName = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) "Stop Recording" else "Start Recording",
-//                            icon = Res.drawable.video_recording,
-//                            alpha = alpha
-//                        ) {
-//                            when (viewModel.videoRecordingState.value) {
-//                                RecordingState.STOPPED -> {
-//                                    viewModel.startGspVideoRecording(recorder)
-//                                }
-//
-//                                RecordingState.RECORDING -> {
-//                                    viewModel.stopGpsVideoRecording(recorder)
-//                                }
-//                            }
-//                        }
-//                        Spacer(modifier = Modifier.width(10.dp))
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(PrimaryColor),
-//                            btnName = "${currentLocation?.latitude ?: "-"}",
-//                            icon = Res.drawable.current_location
-//                        ) {
-//                        }
-//
-//                    }
-//                    Spacer(modifier = Modifier.height(5.dp))
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(1f)
-//                            .padding(bottom = 5.dp),
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(PrimaryColor),
-//                            btnName = "Upload",
-//                            icon = Res.drawable.upload,
-//                        ) {
-//                            viewModel.onUploadClicked()
-//                        }
-//                        Spacer(modifier = Modifier.width(10.dp))
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(PrimaryColor),
-//                            btnName = "History",
-//                            icon = Res.drawable.history
-//                        ) {
-//                            if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
-//                                viewModel.stopGpsVideoRecording(recorder)
-//                            }
-//                            onNext.invoke(Routes.VIDEO_HISTORY)
-//                        }
-//                    }
-//                    Spacer(modifier = Modifier.height(5.dp))
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(1f)
-//                            .padding(bottom = 5.dp),
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(PrimaryColor),
-//                            btnName = "Update APK",
-//                            icon = Res.drawable.upload,
-//                        ) {
-//                            viewModel.onUpdateApkClicked()
-//                        }
-//                        Spacer(modifier = Modifier.width(10.dp))
-//                        CustomButton(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .background(PrimaryColor),
-//                            btnName = "Logout",
-//                            icon = Res.drawable.history
-//                        ) {
-//                            viewModel.onLogoutClicked{
-//                                onNext.invoke(Routes.LOGIN)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -390,7 +257,7 @@ fun VideoRecordingScreen(
                                 btnName = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) "Stop Recording" else "Start Recording",
                                 icon = Res.drawable.video_recording,
                                 alpha = alpha,
-                                msg =  if (viewModel.videoRecordingState.value == RecordingState.RECORDING) formattedDuration else "",
+                                msg = if (viewModel.videoRecordingState.value == RecordingState.RECORDING) formattedDuration else "",
                             ) {
                                 when (viewModel.videoRecordingState.value) {
                                     RecordingState.STOPPED -> viewModel.startGspVideoRecording(
@@ -441,7 +308,14 @@ fun VideoRecordingScreen(
                                 if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
                                     viewModel.stopGpsVideoRecording(recorder)
                                 }
-                                onNext.invoke(Routes.VIDEO_HISTORY)
+                                if (isVideoSaving) {
+                                    if (videoSavingProgress.toInt() >= 100) {
+                                        onNext.invoke(Routes.VIDEO_HISTORY)
+                                    }
+                                } else {
+                                    // If no video is saving, navigate immediately
+                                    onNext.invoke(Routes.VIDEO_HISTORY)
+                                }
                             }
                         }
                     }
