@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -94,7 +95,19 @@ fun VideoRecordingScreen(
     val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
     val isVideoSaving by viewModel.isVideoSaving.collectAsState()
     val recordingDuration by viewModel.recordingDuration.collectAsState()
-    val formattedDuration = viewModel.getFormattedDuration()
+//    val formattedDuration = viewModel.getFormattedDuration()
+
+    val formattedDuration by remember(recordingDuration) {
+        derivedStateOf {
+            val totalSeconds = recordingDuration / 1000
+            val hours = totalSeconds / 3600
+            val minutes = (totalSeconds % 3600) / 60
+            val seconds = totalSeconds % 60
+            "${hours.toString().padStart(2, '0')}:${
+                minutes.toString().padStart(2, '0')
+            }:${seconds.toString().padStart(2, '0')}"
+        }
+    }
 
     /*   val composition by rememberLottieComposition {
          LottieCompositionSpec.JsonString(
