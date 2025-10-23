@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,7 +28,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -89,7 +93,7 @@ fun VideoHistoryScreen(
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .padding(start = 2.dp, end = 2.dp, bottom = 0.dp, top = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -100,21 +104,18 @@ fun VideoHistoryScreen(
 
                 Text(
                     text = "DateTime",
-                    modifier = Modifier.padding(start = 32.dp),
                     fontSize = 12.sp,
                     fontFamily = MyAppTypography().labelMedium.fontFamily
                 )
 
                 Text(
                     text = "Count",
-                    modifier = Modifier.padding(start = 32.dp),
                     fontSize = 12.sp,
                     fontFamily = MyAppTypography().labelMedium.fontFamily
                 )
 
                 Text(
-                    text = "Upload/Delete",
-                    modifier = Modifier.padding(start = 32.dp),
+                    text = "Action",
                     fontSize = 12.sp,
                     fontFamily = MyAppTypography().labelMedium.fontFamily
                 )
@@ -193,39 +194,39 @@ fun VideoHistoryScreen(
     }
 }
 
-@Composable
-fun VideoHistoryItemRow(
-    item: VideoItem,
-    onUploadCoordinatesClicked: () -> Unit,
-    onUploadVideoClicked: () -> Unit,
-    onDeleteClicked: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(start = 2.dp, end = 2.dp, bottom = 10.dp, top = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "V${item.videoId}",
-            fontSize = 12.sp,
-            modifier = Modifier.weight(0.15f),
-            fontFamily = MyAppTypography().labelMedium.fontFamily
-        )
-        Text(
-            text = item.dateTime,
-            fontSize = 12.sp,
-            modifier = Modifier.weight(0.3f),
-            fontFamily = MyAppTypography().labelMedium.fontFamily
-        )
-        Text(
-            text = "${item.coordinateCount}",
-            fontSize = 12.sp,
-            modifier = Modifier.weight(0.15f),
-            fontFamily = MyAppTypography().labelMedium.fontFamily
-
-        )
-
+//@Composable
+//fun VideoHistoryItemRow(
+//    item: VideoItem,
+//    onUploadCoordinatesClicked: () -> Unit,
+//    onUploadVideoClicked: () -> Unit,
+//    onDeleteClicked: () -> Unit
+//) {
+//    Row(
+//        modifier = Modifier.fillMaxWidth()
+//            .padding(start = 2.dp, end = 2.dp, bottom = 10.dp, top = 10.dp),
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Text(
+//            text = "V${item.videoId}",
+//            fontSize = 12.sp,
+//            modifier = Modifier.weight(0.15f),
+//            fontFamily = MyAppTypography().labelMedium.fontFamily
+//        )
+//        Text(
+//            text = item.dateTime,
+//            fontSize = 12.sp,
+//            modifier = Modifier.weight(0.3f),
+//            fontFamily = MyAppTypography().labelMedium.fontFamily
+//        )
+//        Text(
+//            text = "${item.coordinateCount}",
+//            fontSize = 12.sp,
+//            modifier = Modifier.weight(0.15f),
+//            fontFamily = MyAppTypography().labelMedium.fontFamily
+//
+//        )
+//
 //        Box(
 //            modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center
 //        ){
@@ -235,30 +236,159 @@ fun VideoHistoryItemRow(
 //                modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
 //            )
 //        }
+//
+////        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
+////            if (item.isUploaded) {
+////                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+////            } else {
+////                Image(
+////                    painter = painterResource(Res.drawable.ic_upload), // Replace with your upload icon
+////                    contentDescription = "Upload Data for V${item.videoId}",
+////                    modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
+////                )
+////            }
+////        }
+////
+////        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
+////            if (item.isDeleted) {
+////                CircularProgressIndicator(
+////                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
+////                )
+////            } else {
+////                Image(
+////                    painter = painterResource(Res.drawable.ic_delete), // Replace with your delete icon
+////                    contentDescription = "Delete Data for V${item.videoId}",
+////                    modifier = Modifier.size(20.dp).clickable(onClick = onDeleteClicked),
+////                    colorFilter = ColorFilter.tint(Color.Red)
+////                )
+////            }
+////        }
+//    }
+//}
 
-        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-            if (item.isUploaded) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            } else {
-                Image(
-                    painter = painterResource(Res.drawable.ic_upload), // Replace with your upload icon
-                    contentDescription = "Upload Data for V${item.videoId}",
-                    modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
-                )
-            }
-        }
+@Composable
+fun VideoHistoryItemRow(
+    item: VideoItem,
+    onUploadCoordinatesClicked: () -> Unit,
+    onUploadVideoClicked: () -> Unit,
+    onDeleteClicked: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-            if (item.isDeleted) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(start = 2.dp, end = 2.dp, bottom = 10.dp, top = 10.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "V${item.videoId}",
+            fontSize = 12.sp,
+            fontFamily = MyAppTypography().labelMedium.fontFamily
+        )
+        Text(
+            text = item.dateTime,
+            fontSize = 12.sp,
+            fontFamily = MyAppTypography().labelMedium.fontFamily
+        )
+        Text(
+            text = "${item.coordinateCount}",
+            fontSize = 12.sp,
+            fontFamily = MyAppTypography().labelMedium.fontFamily
+        )
+
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            // Menu Icon
+            Image(
+                painter = painterResource(Res.drawable.ic_menu),
+                contentDescription = "Menu Options",
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { expanded = true }
+            )
+
+            // Enhanced Dropdown Menu with Icons
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .background(Color.White)
+                    .width(200.dp)
+            ) {
+                // Upload Location Option
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onUploadCoordinatesClicked()
+                    },
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_upload),
+                                contentDescription = "Upload Location",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Upload Location",
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
                 )
-            } else {
-                Image(
-                    painter = painterResource(Res.drawable.ic_delete), // Replace with your delete icon
-                    contentDescription = "Delete Data for V${item.videoId}",
-                    modifier = Modifier.size(20.dp).clickable(onClick = onDeleteClicked),
-                    colorFilter = ColorFilter.tint(Color.Red)
+
+                // Upload Video Option
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onUploadVideoClicked()
+                    },
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_upload),
+                                contentDescription = "Upload Video",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Upload Video",
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                )
+
+                // Delete Location Option
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onDeleteClicked()
+                    },
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_delete),
+                                contentDescription = "Delete Location",
+                                modifier = Modifier.size(16.dp),
+                                colorFilter = ColorFilter.tint(Color.Red)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Delete Location",
+                                fontSize = 14.sp,
+                                color = Color.Red
+                            )
+                        }
+                    }
                 )
             }
         }
