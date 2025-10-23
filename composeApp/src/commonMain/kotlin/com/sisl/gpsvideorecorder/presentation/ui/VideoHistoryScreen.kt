@@ -99,25 +99,33 @@ fun VideoHistoryScreen(
                 Text(
                     text = "VId",
                     fontSize = 12.sp,
-                    fontFamily = MyAppTypography().labelMedium.fontFamily
+                    modifier = Modifier.weight(1f),
+                    fontFamily = MyAppTypography().labelMedium.fontFamily,
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "DateTime",
                     fontSize = 12.sp,
-                    fontFamily = MyAppTypography().labelMedium.fontFamily
+                    modifier = Modifier.weight(1f),
+                    fontFamily = MyAppTypography().labelMedium.fontFamily,
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "Count",
+                    modifier = Modifier.weight(1f),
                     fontSize = 12.sp,
-                    fontFamily = MyAppTypography().labelMedium.fontFamily
+                    fontFamily = MyAppTypography().labelMedium.fontFamily,
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "Action",
                     fontSize = 12.sp,
-                    fontFamily = MyAppTypography().labelMedium.fontFamily
+                    modifier = Modifier.weight(1f),
+                    fontFamily = MyAppTypography().labelMedium.fontFamily,
+                    textAlign = TextAlign.Center
                 )
 
 //                Text(
@@ -193,79 +201,6 @@ fun VideoHistoryScreen(
         }
     }
 }
-
-//@Composable
-//fun VideoHistoryItemRow(
-//    item: VideoItem,
-//    onUploadCoordinatesClicked: () -> Unit,
-//    onUploadVideoClicked: () -> Unit,
-//    onDeleteClicked: () -> Unit
-//) {
-//    Row(
-//        modifier = Modifier.fillMaxWidth()
-//            .padding(start = 2.dp, end = 2.dp, bottom = 10.dp, top = 10.dp),
-//        horizontalArrangement = Arrangement.SpaceBetween,
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        Text(
-//            text = "V${item.videoId}",
-//            fontSize = 12.sp,
-//            modifier = Modifier.weight(0.15f),
-//            fontFamily = MyAppTypography().labelMedium.fontFamily
-//        )
-//        Text(
-//            text = item.dateTime,
-//            fontSize = 12.sp,
-//            modifier = Modifier.weight(0.3f),
-//            fontFamily = MyAppTypography().labelMedium.fontFamily
-//        )
-//        Text(
-//            text = "${item.coordinateCount}",
-//            fontSize = 12.sp,
-//            modifier = Modifier.weight(0.15f),
-//            fontFamily = MyAppTypography().labelMedium.fontFamily
-//
-//        )
-//
-//        Box(
-//            modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center
-//        ){
-//            Image(
-//                painter = painterResource(Res.drawable.ic_menu), // Replace with your upload icon
-//                contentDescription = "Upload/Delete Data",
-//                modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
-//            )
-//        }
-//
-////        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-////            if (item.isUploaded) {
-////                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-////            } else {
-////                Image(
-////                    painter = painterResource(Res.drawable.ic_upload), // Replace with your upload icon
-////                    contentDescription = "Upload Data for V${item.videoId}",
-////                    modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
-////                )
-////            }
-////        }
-////
-////        Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
-////            if (item.isDeleted) {
-////                CircularProgressIndicator(
-////                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.Red
-////                )
-////            } else {
-////                Image(
-////                    painter = painterResource(Res.drawable.ic_delete), // Replace with your delete icon
-////                    contentDescription = "Delete Data for V${item.videoId}",
-////                    modifier = Modifier.size(20.dp).clickable(onClick = onDeleteClicked),
-////                    colorFilter = ColorFilter.tint(Color.Red)
-////                )
-////            }
-////        }
-//    }
-//}
-
 @Composable
 fun VideoHistoryItemRow(
     item: VideoItem,
@@ -284,20 +219,27 @@ fun VideoHistoryItemRow(
         Text(
             text = "V${item.videoId}",
             fontSize = 12.sp,
-            fontFamily = MyAppTypography().labelMedium.fontFamily
+            modifier = Modifier.weight(1f),
+            fontFamily = MyAppTypography().labelMedium.fontFamily,
+            textAlign = TextAlign.Center
         )
         Text(
             text = item.dateTime,
             fontSize = 12.sp,
-            fontFamily = MyAppTypography().labelMedium.fontFamily
+            modifier = Modifier.weight(1f),
+            fontFamily = MyAppTypography().labelMedium.fontFamily,
+            textAlign = TextAlign.Center
         )
         Text(
             text = "${item.coordinateCount}",
             fontSize = 12.sp,
-            fontFamily = MyAppTypography().labelMedium.fontFamily
+            modifier = Modifier.weight(1f),
+            fontFamily = MyAppTypography().labelMedium.fontFamily,
+            textAlign = TextAlign.Center
         )
 
         Box(
+            modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
             // Menu Icon
@@ -315,7 +257,7 @@ fun VideoHistoryItemRow(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .background(Color.White)
-                    .width(200.dp)
+                    .width(150.dp)
             ) {
                 // Upload Location Option
                 DropdownMenuItem(
