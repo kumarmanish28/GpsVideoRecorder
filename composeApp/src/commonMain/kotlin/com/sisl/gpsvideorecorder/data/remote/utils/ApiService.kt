@@ -15,13 +15,22 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.core.BytePacketBuilder
+import io.ktor.utils.io.core.build
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.core.writeFully
+import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.io.readByteArray
 
 interface ApiService {
     suspend fun uploadCoordinate(
@@ -32,6 +41,12 @@ interface ApiService {
     suspend fun userLogin(
         loginRequest: LoginRequest
     ): Flow<ApiResponse<LoginResponse>>
+
+    suspend fun downloadAppFile(
+        platformType: String,
+    ): Flow<Float>
+
+
 }
 
 class ApiServiceImpl(private val httpClient: HttpClient) : ApiService {
@@ -79,34 +94,58 @@ class ApiServiceImpl(private val httpClient: HttpClient) : ApiService {
         }
     }
 
-    override suspend fun userLogin(loginRequest: LoginRequest): Flow<ApiResponse<LoginResponse>> = flow{
-        try {
-            emit(ApiResponse.Loading)
-            val request = LoginReqData(
-                userId = loginRequest.userId,
-                password = loginRequest.password
-            )
-            val response = httpClient.post("${Utils.BASE_URL}/location/login") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }
-
-            if (response.status.isSuccess()) {
-                val response = LoginResponse(
-                    code = response.status.value ,
-                    message = "User Found",
-                    user =  response.body<LoginApiResp>().user ?: ""
+    override suspend fun userLogin(loginRequest: LoginRequest): Flow<ApiResponse<LoginResponse>> =
+        flow {
+            try {
+                emit(ApiResponse.Loading)
+                val request = LoginReqData(
+                    userId = loginRequest.userId,
+                    password = loginRequest.password
                 )
-                emit(ApiResponse.Success(response))
-            } else {
-                emit(ApiResponse.Error("User Not Found", response.status.value))
+                val response = httpClient.post("${Utils.BASE_URL}/location/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+
+                if (response.status.isSuccess()) {
+                    val response = LoginResponse(
+                        code = response.status.value,
+                        message = "User Found",
+                        user = response.body<LoginApiResp>().user ?: ""
+                    )
+                    emit(ApiResponse.Success(response))
+                } else {
+                    emit(ApiResponse.Error("User Not Found", response.status.value))
+                }
+
+            } catch (e: Exception) {
+                emit(ApiResponse.Error("User Not Found", 404))
             }
 
-        }catch (e: Exception) {
-            emit(ApiResponse.Error( "User Not Found", 404))
         }
 
+    override suspend fun downloadAppFile(platformType: String): Flow<Float> = flow {
+
+        val url = when (platformType.lowercase()) {
+            "android" -> Utils.APK_DOWNLOAD_URL
+            "ios" -> Utils.IPA_DOWNLOAD_URL
+            else -> throw IllegalArgumentException("Unsupported platform type")
+        }
+        val response = httpClient.get(url)
+        val channel: ByteReadChannel = response.body()
+        val buffer = ByteArray(1024)
+        val totalBytes = response.contentLength() ?: -1L
+        var readBytes = 0L
+
+        while (!channel.isClosedForRead) {
+            val bytesRead = channel.readAvailable(buffer)
+            if (bytesRead > 0 && totalBytes > 0) {
+                readBytes += bytesRead
+                emit(readBytes.toFloat() / totalBytes)
+            }
+        }
     }
+
 
 }
 

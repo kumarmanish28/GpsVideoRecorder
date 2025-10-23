@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
 import com.sisl.gpsvideorecorder.presentation.ui.LoginScreen
 import com.sisl.gpsvideorecorder.presentation.ui.SplashScreen
 import com.sisl.gpsvideorecorder.presentation.ui.VideoHistoryScreen
@@ -140,26 +141,27 @@ fun App() {
                         animationSpec = tween(defaultExitTransitionDuration)
                     ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
                 }) {
-                VideoRecordingScreen {
-                    when (it) {
-                        Routes.VIDEO_HISTORY -> {
-                            navController.navigate(Routes.VIDEO_HISTORY)
-                        }
+                VideoRecordingScreen(
+                    onNext = {
+                        when (it) {
+                            Routes.VIDEO_HISTORY -> {
+                                navController.navigate(Routes.VIDEO_HISTORY)
+                            }
 
-                        Routes.LOGIN -> {
-                            navController.navigate(Routes.LOGIN){
-                                popUpTo(Routes.VIDEO_RECORDING) {
-                                    inclusive = true
+                            Routes.LOGIN -> {
+                                navController.navigate(Routes.LOGIN) {
+                                    popUpTo(Routes.VIDEO_RECORDING) {
+                                        inclusive = true
+                                    }
                                 }
                             }
-                        }
 
-                        Routes.UPLOAD -> {
-                            navController.navigate(Routes.UPLOAD)
+                            Routes.UPLOAD -> {
+                                navController.navigate(Routes.UPLOAD)
+                            }
                         }
                     }
-
-                }
+                )
             }
             composable(
                 Routes.VIDEO_HISTORY,

@@ -26,11 +26,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -60,6 +62,7 @@ import com.sisl.gpsvideorecorder.getPlatform
 import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
 import com.sisl.gpsvideorecorder.presentation.components.recorder.rememberVideoRecorder
+import com.sisl.gpsvideorecorder.presentation.state.DownloadState
 import com.sisl.gpsvideorecorder.presentation.viewmodels.GpsVideoRecorderViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
@@ -84,7 +87,7 @@ import org.koin.compose.koinInject
 @Composable
 fun VideoRecordingScreen(
     viewModel: GpsVideoRecorderViewModel = koinInject(),
-    onNext: (String) -> Unit,
+    onNext: (String) -> Unit
 ) {
 
     val recorder = rememberVideoRecorder(onVideoRecorded = { result ->
@@ -96,6 +99,7 @@ fun VideoRecordingScreen(
     val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
     val isVideoSaving by viewModel.isVideoSaving.collectAsState()
     val recordingDuration by viewModel.recordingDuration.collectAsState()
+    val downloadState by viewModel.downloadState.collectAsState()
 
     val formattedDuration by remember(recordingDuration) {
         derivedStateOf {
@@ -108,6 +112,7 @@ fun VideoRecordingScreen(
             }:${seconds.toString().padStart(2, '0')}"
         }
     }
+
 
     /*   val composition by rememberLottieComposition {
          LottieCompositionSpec.JsonString(
@@ -360,6 +365,53 @@ fun VideoRecordingScreen(
             }
         }
     }
+
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(20.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        when (val state = downloadState) {
+//            is DownloadState.Progress -> {
+//                LinearProgressIndicator(
+//                    progress = { state.percentage },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    color = ProgressIndicatorDefaults.linearColor,
+//                    trackColor = ProgressIndicatorDefaults.linearTrackColor,
+//                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+//                )
+//                Spacer(Modifier.height(8.dp))
+//                Text("Downloading... ${(state.percentage * 100).toInt()}%")
+//            }
+//
+//            is DownloadState.Success -> {
+//                Text("Download Complete ✅")
+//                Spacer(Modifier.height(10.dp))
+//                Button(onClick = { state.bytes?.let {
+//                        viewModel.installApp(state.bytes)
+//                    }}) {
+//                    Text("Install App")
+//                }
+//            }
+//
+//            is DownloadState.Error -> {
+//                Text("Error: ${state.message}", color = Color.Red)
+//                Spacer(Modifier.height(10.dp))
+//                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
+//                    Text("Retry")
+//                }
+//            }
+//
+//            else -> {
+//                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
+//                    Text("Download App")
+//                }
+//            }
+//        }
+//    }
+
 }
 
 @Composable

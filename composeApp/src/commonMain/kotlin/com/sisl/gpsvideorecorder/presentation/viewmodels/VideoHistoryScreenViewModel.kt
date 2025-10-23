@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
+import com.sisl.gpsvideorecorder.presentation.state.DownloadState
 import com.sisl.gpsvideorecorder.presentation.state.VideoHistoryUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -125,6 +126,33 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
                 }
             }
         }
+    }
+
+    fun onUploadVideoClicked(videoId: Long) {
+//        viewModelScope.launch {
+//            repository.uploadVideo(videoId).collect { response ->
+//                when (response) {
+//                    is ApiResponse.Loading -> {}
+//
+//                    is ApiResponse.Success -> {
+//                        _uiState.update { currentState ->
+//                            currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
+//                                if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
+//                            })
+//                        }
+//                        loadVideoHistoryData()
+//                    }
+//
+//                    is ApiResponse.Error -> {
+//                        _uiState.update { currentState ->
+//                            currentState.copy(
+//                                errorMessage = response.message ?: "An unexpected error occurred"
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun clearSuccessMessage() {

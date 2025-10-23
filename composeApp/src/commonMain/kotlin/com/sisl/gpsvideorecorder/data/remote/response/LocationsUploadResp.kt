@@ -13,3 +13,13 @@ data class LocationsUploadResp(
     val storedFile: String,
     val videoname: String
 )
+
+
+@Serializable
+data class UploadVideoResp(
+    @SerialName("filename")
+    val fileName: String? = null,
+    val message: String? = null,
+    @SerialName("saved_path")
+    val savedPath: String? = null,
+)

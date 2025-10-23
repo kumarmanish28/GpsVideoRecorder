@@ -185,7 +185,7 @@ fun VideoHistoryScreen(
                         VideoHistoryItemRow(item = item, onUploadCoordinatesClicked = {
                             videoModel.onUploadClicked(item.videoId)
                         }, onUploadVideoClicked = {
-//                            videoModel.onDeleteClicked(item.videoId)
+//                            videoModel.onUploadVideoClicked(item.videoId)
                         }, onDeleteClicked = {
                             videoModel.onDeleteClicked(item.videoId)
                         })
@@ -285,6 +285,7 @@ fun VideoHistoryItemRow(
 
                 // Upload Video Option
                 DropdownMenuItem(
+                    modifier = Modifier.background(color = Color.Gray.copy(alpha = 0.5f)),
                     onClick = {
                         expanded = false
                         onUploadVideoClicked()

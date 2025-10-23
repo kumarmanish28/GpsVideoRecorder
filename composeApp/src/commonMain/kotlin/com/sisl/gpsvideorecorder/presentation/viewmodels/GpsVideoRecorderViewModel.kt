@@ -6,18 +6,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sisl.gpsvideorecorder.data.PrefDataStoreManager
 import com.sisl.gpsvideorecorder.data.UploadingState
+import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
 import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
+import com.sisl.gpsvideorecorder.getPlatform
 import com.sisl.gpsvideorecorder.presentation.components.recorder.RecordingState
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecInfo
 import com.sisl.gpsvideorecorder.presentation.components.recorder.VideoRecorder
+import com.sisl.gpsvideorecorder.presentation.state.DownloadState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -26,6 +30,7 @@ import kotlinx.datetime.Clock
 class GpsVideoRecorderViewModel(
     private val locationRepository: LocationRepository,
     private val prefManager: PrefDataStoreManager,
+//    private val installer: PlatformInstaller
 ) : ViewModel() {
 
     private val _videoSavingProgress = MutableStateFlow(0f)
@@ -54,6 +59,11 @@ class GpsVideoRecorderViewModel(
     private var durationTimer: Job? = null
     private val _recordingDuration = MutableStateFlow(0L)
     val recordingDuration: StateFlow<Long> = _recordingDuration
+
+    private val _downloadState = MutableStateFlow<DownloadState?>(null)
+    val downloadState = _downloadState.asStateFlow()
+
+
 
     init {
         viewModelScope.launch {
@@ -243,6 +253,27 @@ class GpsVideoRecorderViewModel(
             delay(1000)
             onLogout.invoke()
         }
+    }
+
+
+    fun startDownload(platformType: String) {
+        viewModelScope.launch {
+            locationRepository.downloadAppFile(platformType).collect { state ->
+                _downloadState.value = state
+            }
+        }
+    }
+
+    fun resetDownloadState() {
+        _downloadState.value = null
+    }
+    fun installApp(bytes: ByteArray) {
+//        viewModelScope.launch {
+//            when (getPlatform().name) {
+//                "Android" -> installer.saveAndInstallApp(bytes)
+//                "iOS" -> installer.saveAndInstallApp(bytes)
+//            }
+//        }
     }
 
 }
