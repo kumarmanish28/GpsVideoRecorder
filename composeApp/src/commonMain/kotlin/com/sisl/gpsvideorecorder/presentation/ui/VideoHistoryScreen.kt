@@ -226,6 +226,16 @@ fun VideoHistoryItemRow(
 
         )
 
+//        Box(
+//            modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center
+//        ){
+//            Image(
+//                painter = painterResource(Res.drawable.ic_menu), // Replace with your upload icon
+//                contentDescription = "Upload/Delete Data",
+//                modifier = Modifier.size(20.dp).clickable(onClick = onUploadCoordinatesClicked)
+//            )
+//        }
+
         Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
             if (item.isUploaded) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
