@@ -8,6 +8,8 @@ import com.sisl.gpsvideorecorder.data.datasources.AndroidLocationDataSource
 import com.sisl.gpsvideorecorder.data.datasources.LocationDataSource
 import com.sisl.gpsvideorecorder.data.datasources.createDataStore
 import com.sisl.gpsvideorecorder.data.datasources.createDataStoreWithContext
+import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
+import com.sisl.gpsvideorecorder.data.installerFile.createPlatformInstallerInstance
 import com.sisl.gpsvideorecorder.data.local.dao.LocationDao
 import com.sisl.gpsvideorecorder.data.local.database.GpsRecorderDb
 import com.sisl.gpsvideorecorder.data.local.database.getGpsVideoRecorderDb
@@ -28,6 +30,9 @@ val androidModule = module {
     // PrefDataStoreManager
     single {
         PrefDataStoreManager(get())
+    }
+    single<PlatformInstaller> {
+        createPlatformInstallerInstance(get())
     }
 }
 

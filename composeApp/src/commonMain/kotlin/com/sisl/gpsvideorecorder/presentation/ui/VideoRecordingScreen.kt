@@ -99,7 +99,7 @@ fun VideoRecordingScreen(
     val videoSavingProgress by viewModel.videoSavingProgress.collectAsState()
     val isVideoSaving by viewModel.isVideoSaving.collectAsState()
     val recordingDuration by viewModel.recordingDuration.collectAsState()
-    val downloadState by viewModel.downloadState.collectAsState()
+
 
     val formattedDuration by remember(recordingDuration) {
         derivedStateOf {
@@ -336,11 +336,12 @@ fun VideoRecordingScreen(
                                     .weight(1f)
                                     .background(PrimaryColor),
                                 btnName = "Update APK",
-                                isBtnEnable = false,
-                                alpha = 0.5f,
+                                isBtnEnable = true,
+                                alpha = 1f,
                                 icon = Res.drawable.ic_next, // Use appropriate icon
                             ) {
-                                viewModel.onUpdateApkClicked()
+                                onNext.invoke(Routes.UPDATE_APP)
+//                                viewModel.startDownload(getPlatform().name)
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             CustomButton(
@@ -365,52 +366,6 @@ fun VideoRecordingScreen(
             }
         }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(20.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        when (val state = downloadState) {
-//            is DownloadState.Progress -> {
-//                LinearProgressIndicator(
-//                    progress = { state.percentage },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    color = ProgressIndicatorDefaults.linearColor,
-//                    trackColor = ProgressIndicatorDefaults.linearTrackColor,
-//                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-//                )
-//                Spacer(Modifier.height(8.dp))
-//                Text("Downloading... ${(state.percentage * 100).toInt()}%")
-//            }
-//
-//            is DownloadState.Success -> {
-//                Text("Download Complete ✅")
-//                Spacer(Modifier.height(10.dp))
-//                Button(onClick = { state.bytes?.let {
-//                        viewModel.installApp(state.bytes)
-//                    }}) {
-//                    Text("Install App")
-//                }
-//            }
-//
-//            is DownloadState.Error -> {
-//                Text("Error: ${state.message}", color = Color.Red)
-//                Spacer(Modifier.height(10.dp))
-//                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
-//                    Text("Retry")
-//                }
-//            }
-//
-//            else -> {
-//                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
-//                    Text("Download App")
-//                }
-//            }
-//        }
-//    }
 
 }
 

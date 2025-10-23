@@ -1,9 +1,13 @@
 package com.sisl.gpsvideorecorder.data.installerFile
 
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.io.readByteArray
 import platform.Foundation.*
 import platform.UIKit.UIApplication
 import platform.Foundation.NSFileManager
@@ -40,3 +44,19 @@ actual class PlatformInstaller actual constructor(private val context: Any?) {
 fun ByteArray.toNSData(): NSData = usePinned { pinned ->
     NSData.create(bytes = pinned.addressOf(0), length = size.toULong())
 }
+
+
+actual suspend fun saveToFile(fileName: String, channel: ByteReadChannel): String {
+    val fileManager = NSFileManager.defaultManager
+    val documentsDir = fileManager.URLsForDirectory(
+        NSDocumentDirectory, NSUserDomainMask
+    ).first() as NSURL
+
+    val fileUrl = documentsDir.URLByAppendingPathComponent(fileName)
+    val data = channel.readRemaining().readByteArray().toNSData()
+    fileUrl?.let {
+        data.writeToURL(fileUrl, true)
+    }
+    return fileUrl?.path!!
+}
+

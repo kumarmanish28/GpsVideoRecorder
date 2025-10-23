@@ -3,6 +3,7 @@ package com.sisl.gpsvideorecorder.data.datasources
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
 
 actual fun createDataStore(context: Any?): DataStore<Preferences> {
     return createDataStorePref {

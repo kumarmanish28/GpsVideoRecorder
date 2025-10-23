@@ -34,3 +34,17 @@ fun createHttpClient(): HttpClient {
         expectSuccess = true
     }
 }
+
+fun createBinaryHttpClient(): HttpClient {
+    return HttpClient {
+        install(Logging) {
+            level = LogLevel.INFO
+        }
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = 60000L
+        }
+
+        expectSuccess = false // don't throw 406/403 errors
+    }
+}

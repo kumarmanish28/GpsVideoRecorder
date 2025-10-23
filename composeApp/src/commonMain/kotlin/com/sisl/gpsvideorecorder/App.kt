@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
 import com.sisl.gpsvideorecorder.presentation.ui.LoginScreen
 import com.sisl.gpsvideorecorder.presentation.ui.SplashScreen
+import com.sisl.gpsvideorecorder.presentation.ui.UpdateScreen
 import com.sisl.gpsvideorecorder.presentation.ui.VideoHistoryScreen
 import com.sisl.gpsvideorecorder.presentation.ui.VideoRecordingScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -159,6 +160,10 @@ fun App() {
                             Routes.UPLOAD -> {
                                 navController.navigate(Routes.UPLOAD)
                             }
+
+                            Routes.UPDATE_APP -> {
+                                navController.navigate(Routes.UPDATE_APP)
+                            }
                         }
                     }
                 )
@@ -195,6 +200,38 @@ fun App() {
                 }) {
                 VideoHistoryScreen(navController)
             }
+            composable(
+                Routes.UPDATE_APP,
+                enterTransition = {
+                    // When navigating TO VideoHistoryScreen
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth }, // Slide in from the right
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                exitTransition = {
+                    // When navigating AWAY FROM VideoHistoryScreen
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth }, // Slide out to the left
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                },
+                popEnterTransition = {
+                    // When returning TO VideoHistoryScreen via back press/pop
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth }, // Slide in from the left
+                        animationSpec = tween(defaultEnterTransitionDuration)
+                    ) + fadeIn(animationSpec = tween(defaultEnterTransitionDuration))
+                },
+                popExitTransition = {
+                    // When VideoHistoryScreen is popped FROM the back stack
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth }, // Slide out to the right
+                        animationSpec = tween(defaultExitTransitionDuration)
+                    ) + fadeOut(animationSpec = tween(defaultExitTransitionDuration))
+                }) {
+                UpdateScreen(navController)
+            }
         }
     }
 
@@ -207,4 +244,5 @@ object Routes {
     const val VIDEO_RECORDING = "video_recording"
     const val VIDEO_HISTORY = "VIDEO_HISTORY"
     const val UPLOAD = "UPLOAD"
+    const val UPDATE_APP = "UPDATE_APP"
 }

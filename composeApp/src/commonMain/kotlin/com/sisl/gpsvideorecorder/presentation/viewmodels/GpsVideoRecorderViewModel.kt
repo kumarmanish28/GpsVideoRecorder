@@ -30,7 +30,7 @@ import kotlinx.datetime.Clock
 class GpsVideoRecorderViewModel(
     private val locationRepository: LocationRepository,
     private val prefManager: PrefDataStoreManager,
-//    private val installer: PlatformInstaller
+    private val installer: PlatformInstaller
 ) : ViewModel() {
 
     private val _videoSavingProgress = MutableStateFlow(0f)
@@ -222,29 +222,6 @@ class GpsVideoRecorderViewModel(
             }
         }
     }
-    fun onUpdateApkClicked() {
-        viewModelScope.launch {
-            try {
-//                locationRepository.uploadLocation(null).collect { response ->
-//                    when (response) {
-//                        is ApiResponse.Success -> {
-//                            _uploadAllPendingCoordinates.value = UploadingState.SUCCESS
-//                        }
-//
-//                        is ApiResponse.Error -> {
-//                            _uploadAllPendingCoordinates.value = UploadingState.FAILED
-//                        }
-//
-//                        is ApiResponse.Loading -> {
-//                            _uploadAllPendingCoordinates.value = UploadingState.LOADING
-//                        }
-//                    }
-//                }
-            } catch (ex: Exception) {
-                _uploadAllPendingCoordinates.value = UploadingState.FAILED
-            }
-        }
-    }
     fun onLogoutClicked(onLogout:()->Unit) {
         viewModelScope.launch {
             prefManager.save("USER_ID", "")
@@ -268,12 +245,12 @@ class GpsVideoRecorderViewModel(
         _downloadState.value = null
     }
     fun installApp(bytes: ByteArray) {
-//        viewModelScope.launch {
-//            when (getPlatform().name) {
-//                "Android" -> installer.saveAndInstallApp(bytes)
-//                "iOS" -> installer.saveAndInstallApp(bytes)
-//            }
-//        }
+        viewModelScope.launch {
+            when (getPlatform().name) {
+                "Android" -> installer.saveAndInstallApp(bytes)
+                "iOS" -> installer.saveAndInstallApp(bytes)
+            }
+        }
     }
 
 }
