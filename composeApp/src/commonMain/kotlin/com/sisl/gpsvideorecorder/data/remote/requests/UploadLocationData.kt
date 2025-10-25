@@ -1,18 +1,24 @@
 package com.sisl.gpsvideorecorder.data.remote.requests
 
-import com.sisl.gpsvideorecorder.domain.models.LocationData
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RequestLocationData(
+    @SerialName("time")
     val time: String, // Format "00:01"
+    @SerialName("latitude")
     val latitude: Double,
+    @SerialName("longitude")
     val longitude: Double,
-    val speed: Int = 0
+    @SerialName("speed")
+    val speed: Int? = 0
 )
 
 @Serializable
 data class RequestVideoLocationData(
-    val videoname: String,
-    val locations: List<RequestLocationData>
+    @SerialName("videoname")
+    val videoname: String?="",
+    @SerialName("locations")
+    val locations: List<RequestLocationData>?=emptyList()
 )

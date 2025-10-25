@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
+import kotlinx.serialization.json.Json
 import okio.FileSystem
 import okio.Path
 import okio.SYSTEM
@@ -112,6 +113,7 @@ class ApiServiceImpl(private val httpClient: HttpClient, private val binaryHttpC
             } catch (e: ServerResponseException) {
                 emit(ApiResponse.Error("Server error: ${e.message}", e.response.status.value))
             } catch (e: Exception) {
+                println("${e.message}")
                 emit(ApiResponse.Error(e.message ?: "Unknown error"))
             }
         }
@@ -223,25 +225,6 @@ class ApiServiceImpl(private val httpClient: HttpClient, private val binaryHttpC
             throw e // Re-throw to be caught by repository
         }
     }
-
-    suspend fun ByteReadChannel.copyToOkioPath(filePath: Path) {
-        FileSystem.SYSTEM.sink(filePath).buffer().use { sink ->
-            val channel = this
-            val buffer = ByteArray(8192)
-
-            while (!channel.isClosedForRead) {
-                val bytesRead = channel.readAvailable(buffer)
-                if (bytesRead > 0) {
-                    sink.write(buffer, 0, bytesRead)
-                } else {
-                    delay(1)
-                }
-            }
-            sink.flush()
-        }
-    }
-
-
     override suspend fun checkAppUpdateVersion(): Flow<ApiResponse<AppUpdateVersionApiResp>> =
         flow {
             try {
@@ -267,8 +250,6 @@ class ApiServiceImpl(private val httpClient: HttpClient, private val binaryHttpC
                 emit(ApiResponse.Error(e.message ?: "Unknown error"))
             }
         }
-
-
 }
 
 expect fun getFileSize(filePath: Path): Long

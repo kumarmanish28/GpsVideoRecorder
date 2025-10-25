@@ -92,5 +92,6 @@ interface LocationDao {
     @Query("UPDATE locations SET videoName = :videoName, videoPath = :videoPath WHERE videoId = :videoId")
     suspend fun updateLocationWithVideoName(videoId: Long, videoName: String, videoPath: String)
 
-
+    @Query("SELECT videoPath FROM locations WHERE videoId = :videoId  LIMIT 1")
+    suspend fun getVideoPathByVideoId(videoId: Long): String?
 }

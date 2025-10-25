@@ -11,7 +11,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 fun createHttpClient(): HttpClient {
-    return HttpClient() {
+    return HttpClient {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
@@ -26,9 +26,9 @@ fun createHttpClient(): HttpClient {
         }
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 15000L
-            connectTimeoutMillis = 15000L
-            socketTimeoutMillis = 15000L
+            requestTimeoutMillis = 30000L
+            connectTimeoutMillis = 30000L
+            socketTimeoutMillis = 30000L
         }
 
         expectSuccess = true

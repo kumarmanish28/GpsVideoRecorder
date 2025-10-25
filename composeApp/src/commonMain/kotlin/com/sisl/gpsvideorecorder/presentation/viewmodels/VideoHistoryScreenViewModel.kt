@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
+import com.sisl.gpsvideorecorder.domain.repositories.VideoUploadRepository
 import com.sisl.gpsvideorecorder.presentation.state.DownloadState
+import com.sisl.gpsvideorecorder.presentation.state.UploadVideoState
 import com.sisl.gpsvideorecorder.presentation.state.VideoHistoryUiState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class VideoHistoryScreenViewModel(private val repository: LocationRepository) : ViewModel() {
+class VideoHistoryScreenViewModel(
+    private val repository: LocationRepository,
+    private val uploadRepository: VideoUploadRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VideoHistoryUiState())
     val uiState: StateFlow<VideoHistoryUiState> = _uiState.asStateFlow()
@@ -128,35 +134,36 @@ class VideoHistoryScreenViewModel(private val repository: LocationRepository) : 
         }
     }
 
-    fun onUploadVideoClicked(videoId: Long) {
-//        viewModelScope.launch {
-//            repository.uploadVideo(videoId).collect { response ->
-//                when (response) {
-//                    is ApiResponse.Loading -> {}
-//
-//                    is ApiResponse.Success -> {
-//                        _uiState.update { currentState ->
-//                            currentState.copy(videoItemsList = currentState.videoItemsList.map { videoItem ->
-//                                if (videoItem.videoId == videoId) videoItem.copy(isDeleted = true) else videoItem
-//                            })
-//                        }
-//                        loadVideoHistoryData()
-//                    }
-//
-//                    is ApiResponse.Error -> {
-//                        _uiState.update { currentState ->
-//                            currentState.copy(
-//                                errorMessage = response.message ?: "An unexpected error occurred"
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-    }
-
     fun clearSuccessMessage() {
         _uiState.update { it.copy(successMessage = null) }
+    }
+
+
+    private val _uploadVideoState = MutableStateFlow<UploadVideoState>(UploadVideoState.Idle)
+    val uploadVideoState: StateFlow<UploadVideoState> = _uploadVideoState
+
+    private var uploadJob: Job? = null
+
+    fun onUploadVideoClicked(videoId: Long) {
+        uploadJob?.cancel() // Cancel previous upload if any
+        uploadJob = viewModelScope.launch {
+            uploadRepository.uploadVideo(videoId).collect { state ->
+                _uploadVideoState.value = state
+                println("📱 Upload State: $state")
+            }
+        }
+    }
+
+    fun cancelUpload() {
+        uploadJob?.cancel()
+        viewModelScope.launch {
+            uploadRepository.cancelUpload()
+        }
+    }
+
+    fun resetState() {
+        _uploadVideoState.value = UploadVideoState.Idle
+        uploadJob?.cancel()
     }
 
 
