@@ -218,6 +218,7 @@ actual class VideoRecorder actual constructor(
                         onSavingProgress?.invoke(100f)
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, "Video saved to gallery", Toast.LENGTH_SHORT).show()
+                            print("${getVideoLocation(galleryUri)}  --- ${videoFileName}    ---   ${galleryUri}")
                             val videoRecordedInfo = VideoRecInfo(
                                 videoUri = galleryUri.toString(),
                                 videoName = videoFileName!!,

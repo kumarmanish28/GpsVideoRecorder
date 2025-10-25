@@ -42,9 +42,12 @@ fun createBinaryHttpClient(): HttpClient {
         }
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 60000L
+            // Disable all timeouts (set to infinite)
+            requestTimeoutMillis = Long.MAX_VALUE
+            connectTimeoutMillis = Long.MAX_VALUE
+            socketTimeoutMillis = Long.MAX_VALUE
         }
 
-        expectSuccess = false // don't throw 406/403 errors
+        expectSuccess = false // Don't throw on 400/500
     }
 }

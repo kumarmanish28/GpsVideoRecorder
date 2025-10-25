@@ -7,4 +7,6 @@ import kotlinx.serialization.Serializable
 data class LoginApiResp(
     @SerialName("user")
     val user: String?=null,
+    @SerialName("version")
+    val version: String?=null,
 )

@@ -90,8 +90,8 @@ class LoginScreenViewModel(
     private fun checkUserLoginStatus() {
         viewModelScope.launch {
             val userId = prefManager.getValue("USER_ID")
-//            _isUserLoggedIn.value = !userId.isNullOrEmpty()
-            _isUserLoggedIn.value = true //remove this in production
+            _isUserLoggedIn.value = !userId.isNullOrEmpty()
+//            _isUserLoggedIn.value = true //remove this in production
         }
     }
     fun storeDataIntoLocalPref(userId: String, isRemember: Boolean) {

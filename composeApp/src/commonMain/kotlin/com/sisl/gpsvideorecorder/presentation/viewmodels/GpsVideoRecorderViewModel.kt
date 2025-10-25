@@ -187,12 +187,15 @@ class GpsVideoRecorderViewModel(
         val videoId = currentVideoId
         val videoName = result.videoName
         val videoPath = result.videoUri
+        val videoLocation = result.videoLocation
+
+//        print("Hello Hello $videoId  --- $videoName  --- $videoPath  ---  $videoLocation")
         viewModelScope.launch {
             if (videoId != null) {
                 locationRepository.updateLocationWithVideoName(
                     videoId,
                     videoName ?: "",
-                    videoPath ?: ""
+                    videoLocation ?: ""
                 )
             }
         }

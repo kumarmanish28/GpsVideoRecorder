@@ -135,7 +135,8 @@ class ApiServiceImpl(private val httpClient: HttpClient, private val binaryHttpC
                     val response = LoginResponse(
                         code = response.status.value,
                         message = "User Found",
-                        user = response.body<LoginApiResp>().user ?: ""
+                        user = response.body<LoginApiResp>().user ?: "",
+                        version = response.body<LoginApiResp>().version ?: "",
                     )
                     emit(ApiResponse.Success(response))
                 } else {
