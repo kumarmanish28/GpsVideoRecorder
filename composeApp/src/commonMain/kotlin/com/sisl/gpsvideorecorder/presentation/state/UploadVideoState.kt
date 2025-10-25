@@ -1,5 +1,8 @@
 package com.sisl.gpsvideorecorder.presentation.state
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 sealed class UploadVideoState {
     object Idle : UploadVideoState()
     object Preparing : UploadVideoState()
@@ -10,9 +13,13 @@ sealed class UploadVideoState {
 }
 
 
+@Serializable
 data class VideoUploadResponse(
+    @SerialName("filename")
     val filename: String?,
+    @SerialName("message")
     val message: String?,
+    @SerialName("saved_path")
     val saved_path: String?,
-    val error: String?
+    val error: String?=null
 )

@@ -9,8 +9,10 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 
 class VideoUploadApiServiceImpl(
     private val httpClient: HttpClient
@@ -26,7 +28,7 @@ class VideoUploadApiServiceImpl(
                 MultiPartFormDataContent(
                     formData {
                         append(
-                            key = "video", // This should match your backend parameter name
+                            key = "video",
                             value = videoBytes,
                             headers = Headers.build {
                                 append(

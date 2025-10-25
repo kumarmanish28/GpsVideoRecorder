@@ -35,7 +35,7 @@ val locationModule = module {
     single {
         PrefDataStoreManager(get())
     }
-    single<VideoUploadApiService> { VideoUploadApiServiceImpl(get(named("binaryClient"))) }
+    single<VideoUploadApiService> { VideoUploadApiServiceImpl(get(named("jsonClient"))) }
     single<VideoUploadRepository> { VideoUploadRepositoryImpl(get(), get()) }
 
     viewModel { GpsVideoRecorderViewModel(get(), get(), get()) }
