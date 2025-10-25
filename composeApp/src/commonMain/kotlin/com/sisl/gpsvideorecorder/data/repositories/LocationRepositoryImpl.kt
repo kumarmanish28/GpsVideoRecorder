@@ -5,8 +5,10 @@ import com.sisl.gpsvideorecorder.data.local.dao.LocationDao
 import com.sisl.gpsvideorecorder.data.local.entities.LocationEntity
 import com.sisl.gpsvideorecorder.data.local.entities.toDomain
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
+import com.sisl.gpsvideorecorder.data.remote.response.AppUpdateVersionApiResp
 import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.data.remote.utils.ApiService
+import com.sisl.gpsvideorecorder.data.remote.utils.getCacheDirectory
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.models.LoginRequest
 import com.sisl.gpsvideorecorder.domain.models.LoginResponse
@@ -14,6 +16,7 @@ import com.sisl.gpsvideorecorder.domain.models.UploadVideoDomain
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.presentation.state.DownloadState
 import com.sisl.gpsvideorecorder.presentation.state.VideoItem
+import com.sisl.gpsvideorecorder.utils.Utils
 import com.sisl.gpsvideorecorder.utils.Utils.BASE_URL
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -34,6 +37,12 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.io.readByteArray
+import okio.FileSystem
+import okio.Path
+import okio.SYSTEM
+import okio.buffer
+import okio.use
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -136,16 +145,89 @@ class LocationRepositoryImpl(
         try {
             emit(DownloadState.Progress(0f))
 
+            var downloadCompleted = false
+
             apiService.downloadAppFile(platformType).collect { progress ->
                 emit(DownloadState.Progress(progress))
+                if (progress >= 1.0f) {
+                    downloadCompleted = true
+                }
             }
-            emit(DownloadState.Success(ByteArray(0)))
+            if (downloadCompleted) {
+                // Get the downloaded file path
+                val fileName =
+                    if (platformType.lowercase() == "android") Utils.ANDROID_APK_NAME else Utils.IOS_IPA_NAME
+                val filePath = getCacheDirectory() / fileName
+
+                // Verify the file exists and is valid
+                if (isFileExists(filePath)) {
+                    val fileSize = getFileSize(filePath)
+                    val isValidApk = verifyApkFile(filePath)
+
+                    if (fileSize > 0 && isValidApk) {
+                        emit(DownloadState.Success(filePath.toString()))
+                    } else {
+                        emit(DownloadState.Error("Downloaded file is corrupted or invalid"))
+                    }
+                } else {
+                    emit(DownloadState.Error("Downloaded file not found"))
+                }
+            } else {
+                emit(DownloadState.Error("Download did not complete successfully"))
+            }
+
         } catch (e: Exception) {
-            emit(DownloadState.Error(e.message ?: "Unknown error"))
+            emit(DownloadState.Error(e.message ?: "Unknown error during download"))
         }
     }
 
+    // Helper function to verify APK file
+    private suspend fun verifyApkFile(filePath: Path): Boolean {
+        return try {
+            FileSystem.SYSTEM.source(filePath).use { source ->
+                val header = source.buffer().readByteArray(4)
+                // Check for PK zip signature (APK files are ZIP files)
+                header[0] == 0x50.toByte() && // P
+                        header[1] == 0x4B.toByte() && // K
+                        header[2] == 0x03.toByte() &&
+                        header[3] == 0x04.toByte()
+            }
+        } catch (e: Exception) {
+            println("❌ APK verification failed: ${e.message}")
+            false
+        }
+    }
 
+    // Helper function to check if file exists
+    private fun isFileExists(filePath: Path): Boolean {
+        return try {
+            FileSystem.SYSTEM.exists(filePath)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // Helper function to get file size
+    private fun getFileSize(filePath: Path): Long {
+        return try {
+            FileSystem.SYSTEM.metadata(filePath).size ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+    }
+
+    override suspend fun checkAppUpdateVersion(): Flow<ApiResponse<AppUpdateVersionApiResp>> =
+        flow {
+            try {
+                emit(ApiResponse.Loading)
+                // Collect from the API service flow
+                apiService.checkAppUpdateVersion().collect { response ->
+                    emit(response)
+                }
+            } catch (ex: Exception) {
+                emit(ApiResponse.Error(ex.message ?: "No data found", 409))
+            }
+        }
 
 //    override suspend fun uploadVideo(videoId: Long): Flow<ApiResponse<UploadVideoDomain>> {
 //        return flow {

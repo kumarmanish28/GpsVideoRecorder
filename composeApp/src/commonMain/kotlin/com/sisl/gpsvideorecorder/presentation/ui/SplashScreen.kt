@@ -51,6 +51,7 @@ fun SplashScreen(
 ) {
     var startAnimation by remember { mutableStateOf(false) }
     val isUserLoggedIn by viewModel.isUserLoggedIn.collectAsState()
+    val checkAppVersion by viewModel.appUpdateVersion.collectAsState()
 
     LaunchedEffect(isUserLoggedIn) {
         when (isUserLoggedIn) {
@@ -97,12 +98,9 @@ fun SplashScreen(
         label = "Rotation Animation"
     )
 
-    // Launch animation
-//    LaunchedEffect(key1 = true) {
-//        startAnimation = true
-//        delay(2000)
-//        onSplashFinished()
-//    }
+    LaunchedEffect(key1 = Unit){
+        viewModel.checkAppUpdate()
+    }
 
     Box(
         modifier = Modifier

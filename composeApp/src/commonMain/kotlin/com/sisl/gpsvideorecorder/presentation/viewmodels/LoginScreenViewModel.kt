@@ -26,6 +26,9 @@ class LoginScreenViewModel(
     private val _uiState = MutableStateFlow(LoginScreenUiState())
     val uiState: StateFlow<LoginScreenUiState> = _uiState.asStateFlow()
 
+    private val _appUpdateVersion = MutableStateFlow<String?>(null)
+    val appUpdateVersion: StateFlow<String?> = _appUpdateVersion.asStateFlow()
+
     fun onLoginClicked(userId: String, pass: String, isRemember: Boolean) {
         viewModelScope.launch {
             try {
@@ -87,12 +90,39 @@ class LoginScreenViewModel(
     private fun checkUserLoginStatus() {
         viewModelScope.launch {
             val userId = prefManager.getValue("USER_ID")
-            _isUserLoggedIn.value = !userId.isNullOrEmpty()
+//            _isUserLoggedIn.value = !userId.isNullOrEmpty()
+            _isUserLoggedIn.value = true //remove this in production
         }
     }
     fun storeDataIntoLocalPref(userId: String, isRemember: Boolean) {
         viewModelScope.launch {
             prefManager.save("USER_ID", userId)
+        }
+    }
+
+    fun checkAppUpdate() {
+        viewModelScope.launch {
+            try {
+                repository.checkAppUpdateVersion().collect  { response ->
+                    when (response) {
+                        is ApiResponse.Success -> {
+                            _appUpdateVersion.update {
+                                response.data.version
+                            }
+                        }
+                        is ApiResponse.Error -> {
+                            _appUpdateVersion.update {
+                              null
+                            }
+                        }
+                        is ApiResponse.Loading -> {}
+                    }
+                }
+            } catch (ex: Exception) {
+                _appUpdateVersion.update {
+                    null
+                }
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -30,47 +31,54 @@ fun UpdateScreen(
     viewModel: GpsVideoRecorderViewModel = koinInject(),
 ) {
     val downloadState by viewModel.downloadState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         when (val state = downloadState) {
+            is DownloadState.Loading -> {
+                Text("Preparing download...")
+                CircularProgressIndicator()
+            }
             is DownloadState.Progress -> {
-                LinearProgressIndicator(
-                    progress = { state.percentage },
-                    modifier = Modifier.fillMaxWidth(),
-                    color = ProgressIndicatorDefaults.linearColor,
-                    trackColor = ProgressIndicatorDefaults.linearTrackColor,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
-                Spacer(Modifier.height(8.dp))
                 Text("Downloading... ${(state.percentage * 100).toInt()}%")
+                LinearProgressIndicator(
+                progress = { state.percentage },
+                modifier = Modifier.fillMaxWidth(),
+                color = ProgressIndicatorDefaults.linearColor,
+                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                )
             }
-
             is DownloadState.Success -> {
-                Text("Download Complete ✅")
-                Spacer(Modifier.height(10.dp))
-                Button(onClick = { state.bytes?.let {
-                    viewModel.installApp(state.bytes)
-                }}) {
-                    Text("Install App")
+                Text("✅ Download completed!", color = Color.Green)
+                Button(
+                    onClick = {
+                        state.filePath?.let {
+                            viewModel.installApp(it)
+                        }
+                    }
+                ) {
+                    Text("Install Now")
                 }
             }
-
             is DownloadState.Error -> {
-                Text("Error: ${state.message}", color = Color.Red)
-                Spacer(Modifier.height(10.dp))
-                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
-                    Text("Retry")
+                Text("❌ ${state.message}", color = Color.Red)
+                Button(
+                    onClick = { viewModel.resetDownloadState() }
+                ) {
+                    Text("Try Again")
                 }
             }
-
-            else -> {
-                Button(onClick = { viewModel.startDownload(getPlatform().name) }) {
-                    Text("Update App")
+            null -> {
+                Button(
+                    onClick = { viewModel.startDownload("android") }
+                ) {
+                    Text("Download Update")
                 }
             }
         }

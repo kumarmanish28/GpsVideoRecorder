@@ -9,7 +9,6 @@ import com.sisl.gpsvideorecorder.data.UploadingState
 import com.sisl.gpsvideorecorder.data.installerFile.PlatformInstaller
 import com.sisl.gpsvideorecorder.data.local.entities.toEntity
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
-import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.domain.models.LocationData
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
 import com.sisl.gpsvideorecorder.getPlatform
@@ -26,6 +25,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.SYSTEM
+import okio.buffer
+import okio.use
 
 class GpsVideoRecorderViewModel(
     private val locationRepository: LocationRepository,
@@ -62,7 +66,6 @@ class GpsVideoRecorderViewModel(
 
     private val _downloadState = MutableStateFlow<DownloadState?>(null)
     val downloadState = _downloadState.asStateFlow()
-
 
 
     init {
@@ -222,7 +225,8 @@ class GpsVideoRecorderViewModel(
             }
         }
     }
-    fun onLogoutClicked(onLogout:()->Unit) {
+
+    fun onLogoutClicked(onLogout: () -> Unit) {
         viewModelScope.launch {
             prefManager.save("USER_ID", "")
             prefManager.save("REMEMBER_ME", "false")
@@ -235,8 +239,17 @@ class GpsVideoRecorderViewModel(
 
     fun startDownload(platformType: String) {
         viewModelScope.launch {
+            _downloadState.value = DownloadState.Loading
             locationRepository.downloadAppFile(platformType).collect { state ->
+                println("📱 Download state: $state")
                 _downloadState.value = state
+
+                // Auto-install on success for Android
+                if (state is DownloadState.Success && getPlatform().name == "Android") {
+                    state.filePath?.let {
+                        installApp(state.filePath)
+                    }
+                }
             }
         }
     }
@@ -244,11 +257,27 @@ class GpsVideoRecorderViewModel(
     fun resetDownloadState() {
         _downloadState.value = null
     }
-    fun installApp(bytes: ByteArray) {
+
+    fun installApp(filePath: String) {
         viewModelScope.launch {
-            when (getPlatform().name) {
-                "Android" -> installer.saveAndInstallApp(bytes)
-                "iOS" -> installer.saveAndInstallApp(bytes)
+            try {
+                when (getPlatform().name) {
+                    "Android" -> {
+                        val fileData = FileSystem.SYSTEM.source(filePath.toPath()).use { source ->
+                            source.buffer().readByteArray()
+                        }
+                        installer.saveAndInstallApp(fileData)
+                    }
+
+                    "iOS" -> {
+                        val fileData = FileSystem.SYSTEM.source(filePath.toPath()).use { source ->
+                            source.buffer().readByteArray()
+                        }
+                        installer.saveAndInstallApp(fileData)
+                    }
+                }
+            } catch (e: Exception) {
+                _downloadState.value = DownloadState.Error("Installation failed: ${e.message}")
             }
         }
     }

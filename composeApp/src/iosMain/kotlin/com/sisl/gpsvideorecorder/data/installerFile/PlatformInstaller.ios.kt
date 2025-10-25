@@ -1,5 +1,6 @@
 package com.sisl.gpsvideorecorder.data.installerFile
 
+import com.sisl.gpsvideorecorder.utils.Utils
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
@@ -24,7 +25,7 @@ actual class PlatformInstaller actual constructor(private val context: Any?) {
             NSUserDomainMask
         ).first() as NSURL
 
-        val fileUrl = documents.URLByAppendingPathComponent("update.ipa")
+        val fileUrl = documents.URLByAppendingPathComponent(Utils.IOS_IPA_NAME)
 
         // ✅ Convert ByteArray → NSData safely
         val data = bytes.toNSData()

@@ -2,6 +2,7 @@ package com.sisl.gpsvideorecorder.domain.repositories
 
 import com.sisl.gpsvideorecorder.data.local.entities.LocationEntity
 import com.sisl.gpsvideorecorder.data.remote.response.ApiResponse
+import com.sisl.gpsvideorecorder.data.remote.response.AppUpdateVersionApiResp
 import com.sisl.gpsvideorecorder.data.remote.response.LocationsUploadResp
 import com.sisl.gpsvideorecorder.data.remote.response.LoginApiResp
 import com.sisl.gpsvideorecorder.data.remote.response.UploadVideoResp
@@ -34,4 +35,6 @@ interface LocationRepository {
 //    suspend fun uploadVideo(videoId: Long): Flow<ApiResponse<UploadVideoDomain>>
 
     suspend fun downloadAppFile(platformType: String): Flow<DownloadState>
+
+    suspend fun checkAppUpdateVersion(): Flow<ApiResponse<AppUpdateVersionApiResp>>
 }
