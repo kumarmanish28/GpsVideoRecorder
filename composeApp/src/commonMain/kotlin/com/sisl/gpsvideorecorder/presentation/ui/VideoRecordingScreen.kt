@@ -68,6 +68,7 @@ import gpsvideorecorder.composeapp.generated.resources.Res
 import gpsvideorecorder.composeapp.generated.resources.compose_multiplatform
 import gpsvideorecorder.composeapp.generated.resources.current_location
 import gpsvideorecorder.composeapp.generated.resources.history
+import gpsvideorecorder.composeapp.generated.resources.ic_download_apk
 import gpsvideorecorder.composeapp.generated.resources.ic_next
 import gpsvideorecorder.composeapp.generated.resources.upload
 import gpsvideorecorder.composeapp.generated.resources.video_recording
@@ -299,8 +300,9 @@ fun VideoRecordingScreen(
                                     .background(PrimaryColor),
                                 btnName = "View Tracks",
                                 icon = Res.drawable.upload,
+                                isBtnEnable = false
                             ) {
-                                viewModel.onUploadClicked()
+//                                viewModel.onUploadClicked()
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             CustomButton(
@@ -338,7 +340,7 @@ fun VideoRecordingScreen(
                                 btnName = "Update APK",
                                 isBtnEnable = true,
                                 alpha = 1f,
-                                icon = Res.drawable.ic_next, // Use appropriate icon
+                                icon = Res.drawable.ic_download_apk, // Use appropriate icon
                             ) {
                                 onNext.invoke(Routes.UPDATE_APP)
 //                                viewModel.startDownload(getPlatform().name)
@@ -463,6 +465,5 @@ fun CustomButton2(
         }
     }
 }
-
 
 

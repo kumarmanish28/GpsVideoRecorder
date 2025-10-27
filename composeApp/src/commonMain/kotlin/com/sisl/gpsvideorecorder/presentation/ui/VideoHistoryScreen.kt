@@ -332,7 +332,7 @@ fun VideoHistoryItemRow(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
-                                painter = painterResource(Res.drawable.ic_upload),
+                                painter = painterResource(Res.drawable.ic_upload_location),
                                 contentDescription = "Upload Location",
                                 modifier = Modifier.size(16.dp)
                             )
@@ -357,7 +357,7 @@ fun VideoHistoryItemRow(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
-                                painter = painterResource(Res.drawable.ic_upload),
+                                painter = painterResource(Res.drawable.ic_upload_video),
                                 contentDescription = "Upload Video",
                                 modifier = Modifier.size(16.dp)
                             )

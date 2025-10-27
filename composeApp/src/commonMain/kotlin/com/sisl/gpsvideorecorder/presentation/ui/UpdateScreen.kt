@@ -1,5 +1,6 @@
 package com.sisl.gpsvideorecorder.presentation.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.sisl.gpsvideorecorder.PrimaryColor
+import com.sisl.gpsvideorecorder.Routes
 import com.sisl.gpsvideorecorder.getPlatform
+import com.sisl.gpsvideorecorder.presentation.components.RedButtonCTA
 import com.sisl.gpsvideorecorder.presentation.state.DownloadState
 import com.sisl.gpsvideorecorder.presentation.viewmodels.GpsVideoRecorderViewModel
+import gpsvideorecorder.composeapp.generated.resources.Res
+import gpsvideorecorder.composeapp.generated.resources.ic_download_apk
+import gpsvideorecorder.composeapp.generated.resources.ic_next
 import org.koin.compose.koinInject
 
 @Composable
@@ -46,40 +53,60 @@ fun UpdateScreen(
             }
             is DownloadState.Progress -> {
                 Text("Downloading... ${(state.percentage * 100).toInt()}%")
+                Spacer(modifier = Modifier.height(2.dp))
                 LinearProgressIndicator(
                 progress = { state.percentage },
                 modifier = Modifier.fillMaxWidth(),
-                color = ProgressIndicatorDefaults.linearColor,
-                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                color = PrimaryColor,
+                trackColor = PrimaryColor,
                 strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                 )
             }
             is DownloadState.Success -> {
-                Text("✅ Download completed!", color = Color.Green)
-                Button(
-                    onClick = {
+                Text("Download completed!", color = PrimaryColor)
+                Spacer(modifier = Modifier.height(2.dp))
+                RedButtonCTA(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp, vertical = 30.dp)
+                        .height(48.dp),
+                    onButtonClicked = {
                         state.filePath?.let {
                             viewModel.installApp(it)
                         }
-                    }
-                ) {
-                    Text("Install Now")
-                }
+                    },
+                    buttonText = "Install Now",
+                    drawableIcon = Res.drawable.ic_download_apk
+                )
             }
             is DownloadState.Error -> {
                 Text("❌ ${state.message}", color = Color.Red)
-                Button(
-                    onClick = { viewModel.resetDownloadState() }
-                ) {
-                    Text("Try Again")
-                }
+                Spacer(modifier = Modifier.height(2.dp))
+                RedButtonCTA(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp, vertical = 30.dp)
+                        .height(48.dp),
+                    onButtonClicked = {
+                        viewModel.resetDownloadState()
+                    },
+                    buttonText = "Try Again",
+                    drawableIcon = Res.drawable.ic_download_apk
+                )
+
             }
             null -> {
-                Button(
-                    onClick = { viewModel.startDownload("android") }
-                ) {
-                    Text("Download Update")
-                }
+                RedButtonCTA(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp, vertical = 30.dp)
+                        .height(48.dp),
+                    onButtonClicked = {
+                        viewModel.startDownload("android")
+                    },
+                    buttonText = "Download Update",
+                    drawableIcon = Res.drawable.ic_download_apk
+                )
             }
         }
     }
