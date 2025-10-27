@@ -71,7 +71,7 @@ fun createUploadHttpClient(): HttpClient {
         // Longer timeouts for large files
         install(HttpTimeout) {
             requestTimeoutMillis = 30 * 60 * 1000L // 30 minutes for large files
-            connectTimeoutMillis = 60000L
+            connectTimeoutMillis = 30 * 60 * 1000L
             socketTimeoutMillis = 30 * 60 * 1000L
         }
 

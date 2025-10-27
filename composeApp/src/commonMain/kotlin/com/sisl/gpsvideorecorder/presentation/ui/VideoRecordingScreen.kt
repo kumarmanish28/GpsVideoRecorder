@@ -297,7 +297,7 @@ fun VideoRecordingScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .background(PrimaryColor),
-                                btnName = "Upload",
+                                btnName = "View Tracks",
                                 icon = Res.drawable.upload,
                             ) {
                                 viewModel.onUploadClicked()
@@ -307,7 +307,7 @@ fun VideoRecordingScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .background(PrimaryColor),
-                                btnName = "History",
+                                btnName = "Manage Tracks",
                                 icon = Res.drawable.history
                             ) {
                                 if (viewModel.videoRecordingState.value == RecordingState.RECORDING) {
