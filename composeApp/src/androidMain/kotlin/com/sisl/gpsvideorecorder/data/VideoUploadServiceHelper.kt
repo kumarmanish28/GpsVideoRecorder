@@ -22,7 +22,7 @@ class VideoUploadServiceHelper(private val context: Context) {
                     val progress = intent.getFloatExtra("progress", 0f)
                     val uploaded = intent.getLongExtra("uploaded", 0L)
                     val total = intent.getLongExtra("total", 0L)
-                    _uploadState.value = UploadVideoState.Progress(progress, uploaded, total)
+                    _uploadState.value = UploadVideoState.Uploading(progress, uploaded, total)
                 }
 
                 "UPLOAD_SUCCESS" -> {

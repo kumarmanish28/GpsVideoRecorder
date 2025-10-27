@@ -9,6 +9,7 @@ import com.sisl.gpsvideorecorder.data.remote.utils.ApiService
 import com.sisl.gpsvideorecorder.data.remote.utils.ApiServiceImpl
 import com.sisl.gpsvideorecorder.data.remote.utils.createBinaryHttpClient
 import com.sisl.gpsvideorecorder.data.remote.utils.createHttpClient
+import com.sisl.gpsvideorecorder.data.remote.utils.createUploadHttpClient
 import com.sisl.gpsvideorecorder.data.repositories.LocationRepositoryImpl
 import com.sisl.gpsvideorecorder.data.repositories.VideoUploadRepositoryImpl
 import com.sisl.gpsvideorecorder.domain.repositories.LocationRepository
@@ -24,6 +25,7 @@ import org.koin.dsl.module
 val locationModule = module {
     single(named("jsonClient")) { createHttpClient() }
     single(named("binaryClient")) { createBinaryHttpClient() }
+    single(named("jsonUploadClient")) { createUploadHttpClient() }
     single {
         ApiServiceImpl(
             get(named("jsonClient")),
@@ -35,7 +37,7 @@ val locationModule = module {
     single {
         PrefDataStoreManager(get())
     }
-    single<VideoUploadApiService> { VideoUploadApiServiceImpl(get(named("jsonClient"))) }
+    single<VideoUploadApiService> { VideoUploadApiServiceImpl(get(named("jsonUploadClient"))) }
     single<VideoUploadRepository> { VideoUploadRepositoryImpl(get(), get()) }
 
     viewModel { GpsVideoRecorderViewModel(get(), get(), get()) }

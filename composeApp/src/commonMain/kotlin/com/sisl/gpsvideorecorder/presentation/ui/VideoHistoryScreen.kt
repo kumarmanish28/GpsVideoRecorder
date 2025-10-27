@@ -90,7 +90,7 @@ fun VideoHistoryScreen(
                 println("📱 Setting showUploadDialog to TRUE (Preparing)")
                 showUploadDialog = true
             }
-            is UploadVideoState.Progress -> {
+            is UploadVideoState.Uploading -> {
                 println("📱 Setting showUploadDialog to TRUE (Progress)")
                 showUploadDialog = true
             }
@@ -413,7 +413,7 @@ fun VideoUploadDialog(
         onDismissRequest = {
             // Only allow dismissal if not actively uploading
             when (uploadState) {
-                is UploadVideoState.Progress -> {
+                is UploadVideoState.Uploading -> {
                     // Show confirmation or auto-cancel
                     onCancelUpload()
                     onDismissRequest()
@@ -423,13 +423,13 @@ fun VideoUploadDialog(
             }
         },
         properties = DialogProperties(
-            dismissOnBackPress = uploadState !is UploadVideoState.Progress,
-            dismissOnClickOutside = uploadState !is UploadVideoState.Progress
+            dismissOnBackPress = uploadState !is UploadVideoState.Uploading,
+            dismissOnClickOutside = uploadState !is UploadVideoState.Uploading
         ),
         title = {
             Text(
                 text = when (uploadState) {
-                    is UploadVideoState.Progress -> "Uploading Video V$videoId"
+                    is UploadVideoState.Uploading -> "Uploading Video V$videoId"
                     is UploadVideoState.Success -> "Upload Complete"
                     is UploadVideoState.Error -> "Upload Failed"
                     is UploadVideoState.Cancelled -> "Upload Cancelled"
@@ -447,9 +447,9 @@ fun VideoUploadDialog(
                     UploadPreparingView()
                 }
 
-                is UploadVideoState.Progress -> {
+                is UploadVideoState.Uploading -> {
                     UploadProgressView(
-                        progress = uploadState.percentage,
+                        progress = uploadState.progress,
                         uploadedBytes = uploadState.uploadedBytes,
                         totalBytes = uploadState.totalBytes
                     )
@@ -470,11 +470,19 @@ fun VideoUploadDialog(
                 UploadVideoState.Cancelled -> {
                     UploadCancelledView()
                 }
+
+                UploadVideoState.Finalizing -> {
+
+
+                }
+                UploadVideoState.Initiating -> {
+
+                }
             }
         },
         confirmButton = {
             when (uploadState) {
-                is UploadVideoState.Progress -> {
+                is UploadVideoState.Uploading -> {
                     Button(
                         onClick = {
                             onCancelUpload()

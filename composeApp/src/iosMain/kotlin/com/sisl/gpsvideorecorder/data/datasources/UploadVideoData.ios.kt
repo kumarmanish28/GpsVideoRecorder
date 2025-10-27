@@ -31,8 +31,26 @@ actual class PlatformFile(actual val path: String) {
     actual fun exists(): Boolean {
         return fileManager.fileExistsAtPath(path)
     }
+
+    actual fun inputStream(): PlatformInputStream {
+        TODO("Not yet implemented")
+    }
 }
 
 actual fun getPlatformFile(filePath: String): PlatformFile {
     return PlatformFile(filePath)
+}
+
+
+actual fun PlatformFile.asKtorFile(): Any {
+    TODO("Not yet implemented")
+}
+
+actual class PlatformInputStream : AutoCloseable {
+    actual suspend fun read(buffer: ByteArray): Int {
+        TODO("Not yet implemented")
+    }
+
+    actual override fun close() {
+    }
 }

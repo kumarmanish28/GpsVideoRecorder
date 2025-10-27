@@ -51,3 +51,31 @@ fun createBinaryHttpClient(): HttpClient {
         expectSuccess = false // Don't throw on 400/500
     }
 }
+
+fun createUploadHttpClient(): HttpClient {
+    return HttpClient {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                prettyPrint = true
+                isLenient = true
+            })
+        }
+
+        // CRITICAL: NO LOGGING for uploads to prevent OOM
+        // install(Logging) {
+        //     logger = Logger.DEFAULT
+        //     level = LogLevel.ALL
+        // }
+
+        // Longer timeouts for large files
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30 * 60 * 1000L // 30 minutes for large files
+            connectTimeoutMillis = 60000L
+            socketTimeoutMillis = 30 * 60 * 1000L
+        }
+
+        expectSuccess = false
+    }
+}
+

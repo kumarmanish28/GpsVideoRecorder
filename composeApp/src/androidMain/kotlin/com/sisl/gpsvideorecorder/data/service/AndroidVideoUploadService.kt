@@ -104,51 +104,51 @@ class AndroidVideoUploadService : Service() {
                 println("🚀 Starting upload: $fileName, Size: $totalBytes bytes")
 
                 // Read file bytes
-                val videoBytes = file.readBytes()
-                if (videoBytes.isEmpty()) {
-                    _uploadState.value = UploadVideoState.Error("Video file is empty")
-                    stopForeground(true)
-                    return@launch
-                }
-
-                println("📁 File read successfully: ${videoBytes.size} bytes")
-
-                // Start actual upload with progress tracking
-                uploadApiService.uploadVideo(
-                    videoBytes = videoBytes,
-                    fileName = fileName,
-                    onProgress = { progress ->
-                        val uploadedBytes = (progress * totalBytes).toLong()
-                        _uploadState.value =
-                            UploadVideoState.Progress(progress, uploadedBytes, totalBytes)
-
-                        // Update notification
-                        updateNotification(
-                            progress = progress,
-                            status = "Uploading... ${(progress * 100).toInt()}%"
-                        )
-                    }
-                ).let { response ->
-                    // Upload successful
-                    _uploadState.value = UploadVideoState.Success(
-                        filename = response.filename ?: "",
-                        savedPath = response.saved_path ?: "",
-                        message = response.message ?: ""
-                    )
-
-                    // Show success notification
-                    updateNotification(
-                        progress = 1.0f,
-                        status = "Upload completed!",
-                        isCompleted = true
-                    )
-
-                    // Stop foreground after delay to show success
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(3000) // Show success for 3 seconds
-                        stopForeground(true)
-                    }
-                }
+//                val videoBytes = file.readBytes()
+//                if (videoBytes.isEmpty()) {
+//                    _uploadState.value = UploadVideoState.Error("Video file is empty")
+//                    stopForeground(true)
+//                    return@launch
+//                }
+//
+//                println("📁 File read successfully: ${videoBytes.size} bytes")
+//
+//                // Start actual upload with progress tracking
+//                uploadApiService.uploadVideo(
+//                    videoBytes = videoBytes,
+//                    fileName = fileName,
+//                    onProgress = { progress ->
+//                        val uploadedBytes = (progress * totalBytes).toLong()
+//                        _uploadState.value =
+//                            UploadVideoState.Progress(progress, uploadedBytes, totalBytes)
+//
+//                        // Update notification
+//                        updateNotification(
+//                            progress = progress,
+//                            status = "Uploading... ${(progress * 100).toInt()}%"
+//                        )
+//                    }
+//                ).let { response ->
+//                    // Upload successful
+//                    _uploadState.value = UploadVideoState.Success(
+//                        filename = response.filename ?: "",
+//                        savedPath = response.saved_path ?: "",
+//                        message = response.message ?: ""
+//                    )
+//
+//                    // Show success notification
+//                    updateNotification(
+//                        progress = 1.0f,
+//                        status = "Upload completed!",
+//                        isCompleted = true
+//                    )
+//
+//                    // Stop foreground after delay to show success
+//                    CoroutineScope(Dispatchers.IO).launch {
+//                        delay(3000) // Show success for 3 seconds
+//                        stopForeground(true)
+//                    }
+//                }
 
             } catch (e: CancellationException) {
                 _uploadState.value = UploadVideoState.Cancelled
