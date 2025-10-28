@@ -1,14 +1,18 @@
 package com.sisl.gpsvideorecorder.data.datasources
 
-// iosMain
 import kotlinx.cinterop.ExperimentalForeignApi
-import okio.ByteString.Companion.toByteString
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.usePinned
+import kotlinx.io.bytestring.toByteString
 import platform.Foundation.NSData
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSInputStream
 import platform.Foundation.NSString
 import platform.Foundation.dataWithContentsOfFile
+import platform.Foundation.inputStreamWithFileAtPath
 import platform.Foundation.lastPathComponent
-import platform.Foundation.stringWithContentsOfFile
+
 
 actual class PlatformFile(actual val path: String) {
     private val fileManager = NSFileManager.defaultManager
@@ -18,7 +22,6 @@ actual class PlatformFile(actual val path: String) {
 
     actual suspend fun readBytes(): ByteArray {
         val nsData = NSData.dataWithContentsOfFile(path)
-        nsData?.toByteString()?.toByteArray()
         return nsData?.toByteString()?.toByteArray() ?: byteArrayOf()
     }
 
@@ -33,24 +36,51 @@ actual class PlatformFile(actual val path: String) {
     }
 
     actual fun inputStream(): PlatformInputStream {
-        TODO("Not yet implemented")
+        return PlatformInputStream(path)
+    }
+}
+
+actual class PlatformInputStream(private val filePath: String) : AutoCloseable {
+    private var inputStream: NSInputStream? = null
+    private var isClosed = false
+
+    init {
+        inputStream = NSInputStream.inputStreamWithFileAtPath(filePath)
+        inputStream?.open()
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual suspend fun read(buffer: ByteArray): Int {
+        if (isClosed) return -1
+        val stream = inputStream ?: return -1
+
+        if (!stream.hasBytesAvailable()) {
+            return -1
+        }
+
+        return buffer.usePinned { pinned ->
+            val bytesRead = stream.read(
+                buffer = pinned.addressOf(0).reinterpret(),
+                maxLength = buffer.size.toULong()
+            )
+            // Convert Long to Int and handle error cases
+            when {
+                bytesRead < 0 -> -1 // Error
+                bytesRead > Int.MAX_VALUE -> Int.MAX_VALUE // Shouldn't happen with normal buffer sizes
+                else -> bytesRead.toInt()
+            }
+        }
+    }
+
+    actual override fun close() {
+        if (!isClosed) {
+            inputStream?.close()
+            inputStream = null
+            isClosed = true
+        }
     }
 }
 
 actual fun getPlatformFile(filePath: String): PlatformFile {
     return PlatformFile(filePath)
-}
-
-
-actual fun PlatformFile.asKtorFile(): Any {
-    TODO("Not yet implemented")
-}
-
-actual class PlatformInputStream : AutoCloseable {
-    actual suspend fun read(buffer: ByteArray): Int {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun close() {
-    }
 }

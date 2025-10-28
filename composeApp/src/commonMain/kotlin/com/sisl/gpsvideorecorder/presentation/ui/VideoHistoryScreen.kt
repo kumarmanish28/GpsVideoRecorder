@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,7 +32,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,18 +49,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.sisl.gpsvideorecorder.MintGreen
 import com.sisl.gpsvideorecorder.MyAppTypography
-import com.sisl.gpsvideorecorder.data.local.models.DateWisePendingLocation
 import com.sisl.gpsvideorecorder.getPlatform
 import com.sisl.gpsvideorecorder.presentation.components.MessageDialog
 import com.sisl.gpsvideorecorder.presentation.state.UploadVideoState
 import com.sisl.gpsvideorecorder.presentation.state.VideoItem
 import com.sisl.gpsvideorecorder.presentation.viewmodels.VideoHistoryScreenViewModel
 import gpsvideorecorder.composeapp.generated.resources.Res
-import gpsvideorecorder.composeapp.generated.resources.*
+import gpsvideorecorder.composeapp.generated.resources.ic_back
+import gpsvideorecorder.composeapp.generated.resources.ic_delete
+import gpsvideorecorder.composeapp.generated.resources.ic_menu
+import gpsvideorecorder.composeapp.generated.resources.ic_upload_location
+import gpsvideorecorder.composeapp.generated.resources.ic_upload_video
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 

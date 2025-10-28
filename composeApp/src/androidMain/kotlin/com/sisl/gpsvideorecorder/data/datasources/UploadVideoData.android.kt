@@ -43,4 +43,3 @@ actual fun getPlatformFile(filePath: String): PlatformFile {
     return PlatformFile(filePath)
 }
 
-actual fun PlatformFile.asKtorFile(): Any = this.getFile()
